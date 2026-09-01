@@ -103,6 +103,18 @@
   .admins-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
   .admins-row:last-child{border-bottom:none;}
   .you-tag{background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-size:.7rem;color:var(--ink-500);margin-left:6px;}
+
+  .tab-intro{font-size:.85rem;color:var(--ink-500);margin:-8px 0 16px;}
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+  .toolbar select,.toolbar input[type=text]{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.86rem;background:#fff;}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;}
+  .code-textarea{width:100%;min-height:60vh;background:var(--navy-950);color:#e2e8f2;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:.78rem;line-height:1.5;resize:vertical;outline:none;}
+  .code-textarea:focus{border-color:var(--blue-500);}
+  .match-row{background:var(--paper-50);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;font-size:.78rem;cursor:pointer;word-break:break-all;}
+  .match-row.selected{border-color:var(--blue-500);background:#eef2ff;}
+  .match-row mark{background:#fde68a;color:var(--ink-900);padding:0 2px;border-radius:3px;}
+  .files-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  .files-table th,.files-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -129,6 +141,8 @@
       <button class="tab-btn" data-tab="media">Media</button>
       <button class="tab-btn" data-tab="settings">Website</button>
       <button class="tab-btn" data-tab="admins">Admins</button>
+      <button class="tab-btn" data-tab="codeeditor">Code Editor</button>
+      <button class="tab-btn" data-tab="codes">Codes</button>
     </div>
 
     <div class="tab-panel" id="reviewsTab">
@@ -298,6 +312,35 @@
         <p id="changePasswordStatus" style="font-size:.85rem;"></p>
       </div>
     </div>
+
+    <div class="tab-panel" id="codeeditorTab" style="display:none;">
+      <div class="section-head"><h2>Code Editor</h2></div>
+      <p class="tab-intro">Find and replace text directly in the live site files. Every change is backed up first and checked for valid script syntax before it's applied — a bad edit is rejected, not saved.</p>
+      <div class="toolbar">
+        <select id="ceFile"></select>
+        <input type="text" id="ceQuery" placeholder="Text to find…" style="flex:1;min-width:220px;">
+        <button class="btn-sm primary" id="ceSearchBtn">Search</button>
+      </div>
+      <div id="ceResults"></div>
+      <div id="ceReplaceForm"></div>
+      <div class="section-head" style="margin-top:24px;"><h2>Backups</h2></div>
+      <div id="ceBackups" class="empty">Select a file above and search once to load backups.</div>
+    </div>
+
+    <div class="tab-panel" id="codesTab" style="display:none;">
+      <div class="section-head"><h2>Codes</h2></div>
+      <p class="tab-intro">Load a live file's full raw source, edit it, and save. A backup is taken before every save, and the save is rejected if the new content fails a script syntax check.</p>
+      <div class="toolbar">
+        <select id="codesFileSelect"></select>
+        <button class="btn-sm" id="codesLoadBtn">Load</button>
+        <button class="btn-sm" id="codesReloadBtn">Reload</button>
+        <input type="text" id="codesFindInput" placeholder="Find in loaded text…" style="min-width:200px;">
+        <button class="btn-sm" id="codesFindBtn">Find next</button>
+        <button class="btn-sm primary" id="codesSaveBtn">Save</button>
+      </div>
+      <p id="codesError" style="color:#dc2626;font-size:.85rem;"></p>
+      <textarea id="codesTextarea" class="code-textarea code-mono" placeholder="Click Load to fetch the file's current contents…"></textarea>
+    </div>
   </main>
 </div>
 
@@ -412,12 +455,16 @@
     media: document.getElementById('mediaTab'),
     settings: document.getElementById('settingsTab'),
     admins: document.getElementById('adminsTab'),
+    codeeditor: document.getElementById('codeeditorTab'),
+    codes: document.getElementById('codesTab'),
   };
   const tabLoaders = {
     blog: () => loadBlogPosts(),
     media: () => loadMedia(),
     settings: () => loadSettings(),
     admins: () => loadAdmins(),
+    codeeditor: () => initCodeEditorTab(),
+    codes: () => initCodesTab(),
   };
   const loadedTabs = new Set();
   tabButtons.forEach(btn => {
@@ -881,6 +928,235 @@
       changePasswordStatus.textContent = e.message;
     }
   });
+
+  // ---- Code Editor + Codes ----
+  const EDITABLE_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html', 'styles.css', 'script.js', 'reviews.js'];
+  function fileOptionsHtml(){
+    return EDITABLE_FILES.map(f => `<option value="${f}">${f}</option>`).join('');
+  }
+
+  // Raw fetches here bypass api() (which forces JSON), so they need their
+  // own timeout — a stalled request otherwise hangs the button forever
+  // with no feedback.
+  async function fetchWithTimeout(url, opts, timeoutMs){
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs || 45000);
+    try {
+      return await fetch(url, { ...opts, signal: controller.signal });
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('Request timed out — the server took too long to respond.');
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // ---- Code Editor (targeted find/replace) ----
+  let ceFile = 'index.html';
+  let ceSelectedOccurrence = null;
+
+  function initCodeEditorTab(){
+    document.getElementById('ceFile').innerHTML = fileOptionsHtml();
+    document.getElementById('ceFile').value = ceFile;
+    document.getElementById('ceFile').addEventListener('change', (e) => {
+      ceFile = e.target.value;
+      document.getElementById('ceResults').innerHTML = '';
+      document.getElementById('ceReplaceForm').innerHTML = '';
+      ceLoadBackups();
+    });
+    document.getElementById('ceSearchBtn').addEventListener('click', ceSearch);
+    document.getElementById('ceQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') ceSearch(); });
+    ceLoadBackups();
+  }
+
+  async function ceSearch(){
+    ceFile = document.getElementById('ceFile').value;
+    const query = document.getElementById('ceQuery').value;
+    const resultsEl = document.getElementById('ceResults');
+    if (!query) { resultsEl.innerHTML = '<p class="empty">Type something to search for.</p>'; return; }
+    resultsEl.innerHTML = '<p class="empty">Searching…</p>';
+    try {
+      const data = await api('/api/admin/files/search', { method: 'POST', body: JSON.stringify({ file: ceFile, query, contextChars: 60 }) });
+      ceSelectedOccurrence = null;
+      if (!data.matches.length) { resultsEl.innerHTML = '<p class="empty">No matches found.</p>'; document.getElementById('ceReplaceForm').innerHTML = ''; return; }
+      resultsEl.innerHTML = `<p style="color:var(--ink-500);font-size:.8rem;margin-bottom:8px;">${data.totalOccurrences} occurrence(s)${data.truncated ? ' (showing first ' + data.matches.length + ')' : ''} — click one to select it</p>` +
+        data.matches.map(m => `<div class="match-row code-mono" data-occ="${m.occurrenceIndex}">#${m.occurrenceIndex}&nbsp; ${escapeHtml(m.before)}<mark>${escapeHtml(m.match)}</mark>${escapeHtml(m.after)}</div>`).join('');
+      resultsEl.querySelectorAll('.match-row').forEach(row => {
+        row.addEventListener('click', () => ceSelectMatch(parseInt(row.dataset.occ)));
+      });
+      document.getElementById('ceReplaceForm').innerHTML = `
+        <div class="admin-card" style="margin-top:14px;">
+          <div class="field"><label>Find (must match the text above exactly)</label><input type="text" id="ceFind" class="code-mono" value="${escapeHtml(query)}" style="width:100%;"></div>
+          <div class="field"><label>Replace with</label><textarea id="ceReplaceWith" class="code-mono" style="width:100%;min-height:80px;"></textarea></div>
+          <div class="toolbar">
+            <span id="ceSelectedNote" style="color:var(--ink-500);font-size:.78rem;"></span>
+            <label style="display:flex;align-items:center;gap:6px;color:var(--ink-500);font-size:.78rem;"><input type="checkbox" id="ceReplaceAll" style="width:auto;"> Replace all ${data.totalOccurrences} occurrences</label>
+            <button class="btn-sm primary" id="ceReplaceBtn">Replace</button>
+          </div>
+          <p id="ceReplaceErr" style="color:#dc2626;font-size:.82rem;"></p>
+        </div>`;
+      document.getElementById('ceReplaceBtn').addEventListener('click', ceReplace);
+    } catch (e) {
+      resultsEl.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  function ceSelectMatch(occurrenceIndex){
+    ceSelectedOccurrence = occurrenceIndex;
+    document.querySelectorAll('.match-row').forEach(r => r.classList.toggle('selected', parseInt(r.dataset.occ) === occurrenceIndex));
+    const note = document.getElementById('ceSelectedNote');
+    const replaceAllEl = document.getElementById('ceReplaceAll');
+    if (note) note.textContent = 'Selected occurrence #' + occurrenceIndex;
+    if (replaceAllEl) replaceAllEl.checked = false;
+  }
+
+  async function ceReplace(){
+    const find = document.getElementById('ceFind').value;
+    const replaceWith = document.getElementById('ceReplaceWith').value;
+    const replaceAll = document.getElementById('ceReplaceAll').checked;
+    const errEl = document.getElementById('ceReplaceErr');
+    errEl.textContent = '';
+    if (!confirm(`Replace ${replaceAll ? 'ALL' : (ceSelectedOccurrence !== null ? 'occurrence #' + ceSelectedOccurrence : 'this')} occurrence(s) in ${ceFile}? A backup will be taken first.`)) return;
+    try {
+      const body = { file: ceFile, find, replaceWith, replaceAll };
+      if (!replaceAll && ceSelectedOccurrence !== null) body.occurrenceIndex = ceSelectedOccurrence;
+      const data = await api('/api/admin/files/replace', { method: 'POST', body: JSON.stringify(body) });
+      alert(`Replaced ${data.replacedCount} occurrence(s). Backup: ${data.backupName}`);
+      document.getElementById('ceQuery').value = '';
+      document.getElementById('ceResults').innerHTML = '';
+      document.getElementById('ceReplaceForm').innerHTML = '';
+      ceSelectedOccurrence = null;
+      ceLoadBackups();
+    } catch (e) {
+      errEl.textContent = e.message + (e.occurrences ? ` (${e.occurrences} matches — check "Replace all" or narrow your search text)` : '');
+    }
+  }
+
+  async function ceLoadBackups(){
+    const el = document.getElementById('ceBackups');
+    if (!el) return;
+    el.className = 'empty'; el.textContent = 'Loading…';
+    try {
+      const data = await api('/api/admin/files/backups?file=' + encodeURIComponent(ceFile));
+      if (!data.backups.length) { el.className = 'empty'; el.textContent = 'No backups yet for this file.'; return; }
+      el.outerHTML = '<table class="files-table"><thead><tr><th>Backup</th><th>Size</th><th>Created</th><th></th></tr></thead><tbody>' +
+        data.backups.map(b => `<tr><td class="code-mono" style="font-size:.72rem;">${escapeHtml(b.name)}</td><td>${Math.round(b.sizeBytes / 1024)} KB</td><td>${formatDate(b.createdAt)}</td><td><button class="btn-sm restoreBtn" data-name="${escapeHtml(b.name)}">Restore</button></td></tr>`).join('') +
+        '</tbody></table>';
+      document.querySelectorAll('.restoreBtn').forEach(btn => {
+        btn.addEventListener('click', () => ceRestore(btn.dataset.name));
+      });
+    } catch (e) {
+      el.className = 'empty'; el.textContent = e.message;
+    }
+  }
+
+  async function ceRestore(backupName){
+    if (!confirm(`Restore ${ceFile} from ${backupName}? The current live version will itself be backed up first.`)) return;
+    try {
+      await api('/api/admin/files/restore', { method: 'POST', body: JSON.stringify({ file: ceFile, backupName }) });
+      alert('Restored.');
+      ceLoadBackups();
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  // ---- Codes (full raw-file load/edit/save) ----
+  let codesFile = 'index.html';
+  let codesFindFrom = 0;
+  let codesDirty = false;
+
+  function initCodesTab(){
+    document.getElementById('codesFileSelect').innerHTML = fileOptionsHtml();
+    document.getElementById('codesFileSelect').value = codesFile;
+    document.getElementById('codesFileSelect').addEventListener('change', (e) => {
+      if (codesDirty && !confirm('You have unsaved edits. Discard them and switch files?')) { e.target.value = codesFile; return; }
+      codesFile = e.target.value;
+      codesDirty = false;
+      codesLoad();
+    });
+    document.getElementById('codesLoadBtn').addEventListener('click', codesLoad);
+    document.getElementById('codesReloadBtn').addEventListener('click', codesReload);
+    document.getElementById('codesFindBtn').addEventListener('click', codesFind);
+    document.getElementById('codesFindInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') codesFind(); });
+    document.getElementById('codesSaveBtn').addEventListener('click', () => codesSave(false));
+    document.getElementById('codesTextarea').addEventListener('input', () => { codesDirty = true; });
+  }
+
+  async function codesLoad(){
+    codesFile = document.getElementById('codesFileSelect').value;
+    const ta = document.getElementById('codesTextarea');
+    const errEl = document.getElementById('codesError');
+    errEl.textContent = '';
+    ta.value = 'Loading…';
+    try {
+      const res = await fetchWithTimeout('/api/admin/files/content?file=' + encodeURIComponent(codesFile), { headers: { 'Authorization': 'Bearer ' + getAccessToken() } });
+      if (!res.ok) throw new Error('Failed to load (' + res.status + ')');
+      const text = await res.text();
+      ta.value = text;
+      codesDirty = false;
+    } catch (e) {
+      ta.value = '';
+      errEl.textContent = e.message;
+    }
+  }
+
+  function codesReload(){
+    if (codesDirty && !confirm(`Discard your unsaved edits and reload ${codesFile} from the server?`)) return;
+    codesLoad();
+  }
+
+  function codesFind(){
+    const ta = document.getElementById('codesTextarea');
+    const q = document.getElementById('codesFindInput').value;
+    if (!q) return;
+    const hay = ta.value.toLowerCase();
+    const needle = q.toLowerCase();
+    let idx = hay.indexOf(needle, codesFindFrom);
+    let wrapped = false;
+    if (idx === -1) { idx = hay.indexOf(needle, 0); wrapped = true; }
+    if (idx === -1) { alert('Not found.'); codesFindFrom = 0; return; }
+    ta.focus();
+    ta.setSelectionRange(idx, idx + q.length);
+    const lineHeight = parseFloat(getComputedStyle(ta).lineHeight) || 18;
+    const linesBefore = ta.value.slice(0, idx).split('\n').length;
+    ta.scrollTop = Math.max(0, (linesBefore - 5) * lineHeight);
+    codesFindFrom = idx + q.length;
+    const errEl = document.getElementById('codesError');
+    if (wrapped && errEl) {
+      errEl.style.color = 'var(--ink-500)';
+      errEl.textContent = 'Wrapped to top of file.';
+      setTimeout(() => { if (errEl.textContent === 'Wrapped to top of file.') errEl.textContent = ''; }, 2500);
+    }
+  }
+
+  async function codesSave(confirmDrasticShrink){
+    const ta = document.getElementById('codesTextarea');
+    const errEl = document.getElementById('codesError');
+    errEl.style.color = '#dc2626';
+    errEl.textContent = '';
+    const content = ta.value;
+    if (!content) { errEl.textContent = 'Nothing loaded — click Load first.'; return; }
+    if (!confirm(`Save changes to ${codesFile}? A backup of the current live version will be taken first.`)) return;
+    try {
+      const url = '/api/admin/files/save?file=' + encodeURIComponent(codesFile) + (confirmDrasticShrink ? '&confirmDrasticShrink=true' : '');
+      const res = await fetchWithTimeout(url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getAccessToken(), 'Content-Type': 'text/plain' }, body: content });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 409 && data.newSizeBytes !== undefined) {
+          if (confirm(`New content is ${Math.round(data.newSizeBytes / 1024)}KB vs current ${Math.round(data.currentSizeBytes / 1024)}KB — more than half smaller. This often means content was lost. Save anyway?`)) {
+            return codesSave(true);
+          }
+          return;
+        }
+        throw new Error(data.error || ('Save failed (' + res.status + ')'));
+      }
+      alert('Saved. Backup: ' + data.backupName);
+      codesDirty = false;
+    } catch (e) {
+      errEl.textContent = e.message;
+    }
+  }
 
   if (getAccessToken()) showApp(); else showLogin();
 })();

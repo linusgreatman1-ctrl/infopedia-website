@@ -7,6 +7,7 @@ const blogCtrl = require('../controllers/blog.controller');
 const mediaCtrl = require('../controllers/media.controller');
 const settingsCtrl = require('../controllers/settings.controller');
 const adminUsersCtrl = require('../controllers/adminUsers.controller');
+const filesCtrl = require('../controllers/files.controller');
 
 const router = express.Router();
 router.use(requireAdminAuth);
@@ -44,5 +45,16 @@ router.get('/admins', adminUsersCtrl.listAdmins);
 router.post('/admins', adminUsersCtrl.createAdmin);
 router.delete('/admins/:id', adminUsersCtrl.deleteAdmin);
 router.post('/me/password', adminUsersCtrl.changeOwnPassword);
+
+// Code Editor (targeted find/replace) + Codes (full raw-file editor) —
+// live-patch the site's own static files. Every admin account can use
+// these (no separate role tier here), same as the rest of this API.
+router.get('/files', filesCtrl.listFiles);
+router.post('/files/search', filesCtrl.searchInFile);
+router.post('/files/replace', filesCtrl.replaceInFile);
+router.get('/files/backups', filesCtrl.listBackups);
+router.post('/files/restore', filesCtrl.restoreBackup);
+router.get('/files/content', filesCtrl.getContent);
+router.post('/files/save', express.text({ type: '*/*', limit: '5mb' }), filesCtrl.saveContent);
 
 module.exports = router;
