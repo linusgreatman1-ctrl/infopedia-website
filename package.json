@@ -1,0 +1,17 @@
+{
+  "name": "infopedia-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Infopedia Technology marketing site + backend (reviews, contact form, admin panel)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "nodemailer": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

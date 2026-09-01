@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews Admin — Infopedia Technology</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#050a16; --blue-500:#3b6bff; --cyan-400:#22d3ee; --gold-400:#f2b705;
+    --ink-900:#0b1220; --ink-700:#334155; --ink-500:#64748b;
+    --paper-0:#fff; --paper-50:#f6f8fc; --border:#e2e8f2;
+    --radius-lg:16px; --radius-md:12px; --radius-sm:8px;
+    --font-head:"Sora",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-body);background:var(--paper-50);color:var(--ink-900);line-height:1.5;}
+  header{background:var(--navy-950);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;}
+  header h1{font-family:var(--font-head);font-size:1.1rem;margin:0;}
+  header button{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 14px;border-radius:999px;font-size:.82rem;cursor:pointer;}
+  main{max-width:820px;margin:0 auto;padding:32px 20px 80px;}
+
+  #loginView{max-width:360px;margin:80px auto;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;}
+  #loginView h2{font-family:var(--font-head);font-size:1.2rem;margin:0 0 6px;}
+  #loginView p{color:var(--ink-500);font-size:.88rem;margin:0 0 20px;}
+  #loginView input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;margin-bottom:14px;}
+  #loginView button{width:100%;padding:11px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--blue-500),var(--cyan-400));color:#fff;font-weight:600;font-family:var(--font-head);cursor:pointer;}
+  #loginError{color:#dc2626;font-size:.82rem;min-height:1.2em;margin-top:10px;}
+
+  .stats{display:flex;gap:16px;margin-bottom:24px;}
+  .stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;flex:1;text-align:center;}
+  .stat-num{font-family:var(--font-head);font-size:1.6rem;font-weight:700;color:var(--blue-500);}
+  .stat-label{font-size:.78rem;color:var(--ink-500);}
+
+  .admin-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;}
+  .admin-card.is-hidden{opacity:.55;}
+  .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .admin-stars{color:var(--gold-400);letter-spacing:2px;}
+  .admin-meta{font-size:.78rem;color:var(--ink-500);}
+  .admin-comment{margin:0 0 10px;font-size:.94rem;}
+  .admin-author{font-size:.85rem;color:var(--ink-500);margin:0 0 14px;}
+  .admin-author strong{color:var(--ink-900);}
+
+  .admin-response{background:var(--paper-50);border-left:3px solid var(--blue-500);padding:12px 14px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-bottom:14px;font-size:.9rem;}
+  .admin-response .label{font-family:var(--font-head);font-size:.75rem;font-weight:600;color:var(--blue-500);display:block;margin-bottom:4px;}
+
+  .respond-row{display:flex;gap:10px;}
+  .respond-row textarea{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.88rem;resize:vertical;min-height:44px;}
+  .admin-actions{display:flex;gap:8px;margin-top:10px;}
+  .btn-sm{padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:.8rem;cursor:pointer;font-family:var(--font-head);font-weight:600;}
+  .btn-sm.primary{background:var(--blue-500);border-color:var(--blue-500);color:#fff;}
+  .btn-sm.danger{color:#dc2626;border-color:#fecaca;}
+
+  #app{display:none;}
+  .empty{text-align:center;color:var(--ink-500);padding:60px 0;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+  .tab-btn{background:none;border:none;padding:10px 4px;margin-right:20px;font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--ink-500);cursor:pointer;border-bottom:2px solid transparent;}
+  .tab-btn.active{color:var(--blue-500);border-bottom-color:var(--blue-500);}
+  .tab-badge{display:inline-block;background:var(--gold-400);color:var(--ink-900);font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:6px;}
+
+  .contact-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:14px;}
+  .contact-card.is-unread{border-left:3px solid var(--blue-500);}
+  .contact-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;flex-wrap:wrap;}
+  .contact-who strong{font-family:var(--font-head);font-size:.98rem;}
+  .contact-who a{color:var(--blue-500);font-size:.85rem;}
+  .contact-tag{display:inline-block;background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:.75rem;color:var(--ink-700);margin-top:4px;}
+  .contact-message{font-size:.92rem;white-space:pre-wrap;margin:10px 0;}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <h2>Reviews Admin</h2>
+  <p>Sign in to view and respond to customer reviews.</p>
+  <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password">
+  <button id="loginBtn">Sign in</button>
+  <p id="loginError"></p>
+</div>
+
+<div id="app">
+  <header>
+    <h1>Infopedia Technology — Reviews</h1>
+    <button id="logoutBtn">Sign out</button>
+  </header>
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active" id="tabReviewsBtn">Reviews</button>
+      <button class="tab-btn" id="tabContactsBtn">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
+    </div>
+
+    <div id="reviewsTab">
+      <div class="stats">
+        <div class="stat"><div class="stat-num" id="statTotal">–</div><div class="stat-label">Total reviews</div></div>
+        <div class="stat"><div class="stat-num" id="statAvg">–</div><div class="stat-label">Average rating</div></div>
+        <div class="stat"><div class="stat-num" id="statUnanswered">–</div><div class="stat-label">Awaiting response</div></div>
+      </div>
+      <div id="reviewsAdminList"></div>
+    </div>
+
+    <div id="contactsTab" style="display:none;">
+      <div class="stats">
+        <div class="stat"><div class="stat-num" id="statContactTotal">–</div><div class="stat-label">Total messages</div></div>
+        <div class="stat"><div class="stat-num" id="statContactUnread">–</div><div class="stat-label">Unread</div></div>
+      </div>
+      <div id="contactsAdminList"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const loginView = document.getElementById('loginView');
+  const app = document.getElementById('app');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const listEl = document.getElementById('reviewsAdminList');
+
+  function getToken(){ return sessionStorage.getItem('infopedia_admin_token'); }
+  function setToken(t){ sessionStorage.setItem('infopedia_admin_token', t); }
+  function clearToken(){ sessionStorage.removeItem('infopedia_admin_token'); }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function starString(r){ return '★'.repeat(r) + '☆'.repeat(5-r); }
+  function formatDate(iso){
+    try { return new Date(iso).toLocaleString(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+    catch(e){ return ''; }
+  }
+
+  async function api(path, options={}){
+    const token = getToken();
+    const res = await fetch(path, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? {'Authorization': 'Bearer ' + token} : {}),
+        ...(options.headers || {}),
+      },
+    });
+    if (res.status === 401) {
+      clearToken();
+      showLogin();
+      throw new Error('Session expired');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  function showLogin(){
+    loginView.style.display = 'block';
+    app.style.display = 'none';
+  }
+  function showApp(){
+    loginView.style.display = 'none';
+    app.style.display = 'block';
+    loadReviews();
+    loadContacts();
+  }
+
+  const tabReviewsBtn = document.getElementById('tabReviewsBtn');
+  const tabContactsBtn = document.getElementById('tabContactsBtn');
+  const reviewsTab = document.getElementById('reviewsTab');
+  const contactsTab = document.getElementById('contactsTab');
+  tabReviewsBtn.addEventListener('click', () => {
+    tabReviewsBtn.classList.add('active'); tabContactsBtn.classList.remove('active');
+    reviewsTab.style.display = 'block'; contactsTab.style.display = 'none';
+  });
+  tabContactsBtn.addEventListener('click', () => {
+    tabContactsBtn.classList.add('active'); tabReviewsBtn.classList.remove('active');
+    contactsTab.style.display = 'block'; reviewsTab.style.display = 'none';
+  });
+
+  loginBtn.addEventListener('click', async () => {
+    loginError.textContent = '';
+    const password = passwordInput.value;
+    if (!password) return;
+    loginBtn.disabled = true;
+    try {
+      const data = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
+      setToken(data.token);
+      passwordInput.value = '';
+      showApp();
+    } catch (e) {
+      loginError.textContent = 'Incorrect password.';
+    } finally {
+      loginBtn.disabled = false;
+    }
+  });
+  passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginBtn.click(); });
+
+  logoutBtn.addEventListener('click', () => { clearToken(); showLogin(); });
+
+  function renderStats(reviews){
+    document.getElementById('statTotal').textContent = reviews.length;
+    const avg = reviews.length ? (reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1) : '–';
+    document.getElementById('statAvg').textContent = avg;
+    document.getElementById('statUnanswered').textContent = reviews.filter(r => !r.response).length;
+  }
+
+  function renderReviews(reviews){
+    if (!reviews.length) {
+      listEl.innerHTML = '<p class="empty">No reviews yet.</p>';
+      return;
+    }
+    listEl.innerHTML = reviews.map(r => `
+      <div class="admin-card ${r.hidden ? 'is-hidden' : ''}" data-id="${r.id}">
+        <div class="admin-head">
+          <span class="admin-stars">${starString(r.rating)}</span>
+          <span class="admin-meta">${formatDate(r.createdAt)}${r.hidden ? ' · Hidden' : ''}</span>
+        </div>
+        <p class="admin-comment">"${escapeHtml(r.comment)}"</p>
+        <p class="admin-author"><strong>${escapeHtml(r.name)}</strong>${r.company ? ' &middot; ' + escapeHtml(r.company) : ''}</p>
+        ${r.response ? `
+          <div class="admin-response">
+            <span class="label">Your response &middot; ${formatDate(r.respondedAt)}</span>
+            ${escapeHtml(r.response)}
+          </div>
+        ` : ''}
+        <div class="respond-row">
+          <textarea placeholder="${r.response ? 'Update your response…' : 'Write a response…'}" class="respondText"></textarea>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-sm primary respondBtn">${r.response ? 'Update response' : 'Send response'}</button>
+          <button class="btn-sm danger hideBtn">${r.hidden ? 'Unhide' : 'Hide'}</button>
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.admin-card').forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('.respondBtn').addEventListener('click', async () => {
+        const text = card.querySelector('.respondText').value.trim();
+        if (!text) return;
+        try {
+          await api(`/api/admin/reviews/${id}/respond`, { method: 'POST', body: JSON.stringify({ response: text }) });
+          loadReviews();
+        } catch (e) { alert(e.message); }
+      });
+      card.querySelector('.hideBtn').addEventListener('click', async () => {
+        try {
+          await api(`/api/admin/reviews/${id}/hide`, { method: 'POST', body: JSON.stringify({}) });
+          loadReviews();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadReviews(){
+    try {
+      const data = await api('/api/admin/reviews');
+      renderStats(data.reviews);
+      renderReviews(data.reviews);
+    } catch (e) {
+      listEl.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  const contactsListEl = document.getElementById('contactsAdminList');
+  const unreadBadge = document.getElementById('unreadBadge');
+
+  function renderContactStats(contacts){
+    document.getElementById('statContactTotal').textContent = contacts.length;
+    const unread = contacts.filter(c => !c.read).length;
+    document.getElementById('statContactUnread').textContent = unread;
+    if (unread > 0) { unreadBadge.textContent = unread; unreadBadge.style.display = 'inline-block'; }
+    else { unreadBadge.style.display = 'none'; }
+  }
+
+  function renderContacts(contacts){
+    if (!contacts.length) {
+      contactsListEl.innerHTML = '<p class="empty">No messages yet.</p>';
+      return;
+    }
+    contactsListEl.innerHTML = contacts.map(c => `
+      <div class="contact-card ${!c.read ? 'is-unread' : ''}" data-id="${c.id}">
+        <div class="contact-head">
+          <div class="contact-who">
+            <strong>${escapeHtml(c.name)}</strong><br>
+            <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>
+          </div>
+          <span class="admin-meta">${formatDate(c.createdAt)}</span>
+        </div>
+        ${c.service ? `<span class="contact-tag">${escapeHtml(c.service)}</span>` : ''}
+        <p class="contact-message">${escapeHtml(c.message)}</p>
+        <div class="admin-actions">
+          <button class="btn-sm readBtn">${c.read ? 'Mark unread' : 'Mark read'}</button>
+        </div>
+      </div>
+    `).join('');
+
+    contactsListEl.querySelectorAll('.contact-card').forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('.readBtn').addEventListener('click', async () => {
+        try {
+          await api(`/api/admin/contacts/${id}/read`, { method: 'POST', body: JSON.stringify({}) });
+          loadContacts();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadContacts(){
+    try {
+      const data = await api('/api/admin/contacts');
+      renderContactStats(data.contacts);
+      renderContacts(data.contacts);
+    } catch (e) {
+      contactsListEl.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  if (getToken()) showApp(); else showLogin();
+})();
+</script>
+</body>
+</html>
