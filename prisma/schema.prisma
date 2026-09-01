@@ -1,0 +1,72 @@
+// Infopedia Technology website — database schema.
+// Same architecture as the sibling Handa/PassNow backends: Prisma +
+// PostgreSQL, bcrypt-hashed passwords, JWT access tokens backed by
+// hashed-and-revocable refresh tokens stored in their own table.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  refreshTokens   RefreshToken[]
+  reviewResponses Review[]         @relation("ReviewResponder")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  adminId   String
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  revoked   Boolean   @default(false)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([adminId])
+}
+
+// A review of Infopedia Technology's services, submitted publicly from the
+// site's Reviews section — no account required to leave one.
+model Review {
+  id      String @id @default(uuid())
+  name    String
+  company String?
+  rating  Int // 1-5
+  comment String
+
+  hidden Boolean @default(false) // admin moderation — hidden reviews are excluded from public listings but kept for the record
+
+  response            String?
+  respondedAt         DateTime?
+  respondedByAdminId  String?
+  respondedByAdmin    AdminUser? @relation("ReviewResponder", fields: [respondedByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([hidden])
+}
+
+// A submission from the site's Contact form.
+model ContactMessage {
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  service String?
+  message String
+  read    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([read])
+}

@@ -74,8 +74,9 @@
 <body>
 
 <div id="loginView">
-  <h2>Reviews Admin</h2>
-  <p>Sign in to view and respond to customer reviews.</p>
+  <h2>Infopedia Admin</h2>
+  <p>Sign in to view and respond to reviews and messages.</p>
+  <input type="email" id="emailInput" placeholder="Admin email" autocomplete="username">
   <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password">
   <button id="loginBtn">Sign in</button>
   <p id="loginError"></p>
@@ -115,15 +116,23 @@
 (function(){
   const loginView = document.getElementById('loginView');
   const app = document.getElementById('app');
+  const emailInput = document.getElementById('emailInput');
   const passwordInput = document.getElementById('passwordInput');
   const loginBtn = document.getElementById('loginBtn');
   const loginError = document.getElementById('loginError');
   const logoutBtn = document.getElementById('logoutBtn');
   const listEl = document.getElementById('reviewsAdminList');
 
-  function getToken(){ return sessionStorage.getItem('infopedia_admin_token'); }
-  function setToken(t){ sessionStorage.setItem('infopedia_admin_token', t); }
-  function clearToken(){ sessionStorage.removeItem('infopedia_admin_token'); }
+  function getAccessToken(){ return sessionStorage.getItem('infopedia_admin_access'); }
+  function getRefreshToken(){ return sessionStorage.getItem('infopedia_admin_refresh'); }
+  function setTokens(access, refresh){
+    sessionStorage.setItem('infopedia_admin_access', access);
+    if (refresh) sessionStorage.setItem('infopedia_admin_refresh', refresh);
+  }
+  function clearTokens(){
+    sessionStorage.removeItem('infopedia_admin_access');
+    sessionStorage.removeItem('infopedia_admin_refresh');
+  }
 
   function escapeHtml(str){
     const div = document.createElement('div');
@@ -136,18 +145,42 @@
     catch(e){ return ''; }
   }
 
-  async function api(path, options={}){
-    const token = getToken();
-    const res = await fetch(path, {
+  // Wraps fetch() so every backend call carries the signed-in admin's
+  // access token, and transparently retries once via the refresh token if
+  // the access token has expired — matching the same silent-refresh
+  // pattern the Handa/PassNow apps use, so a session survives longer than
+  // one 2-hour access token without forcing a re-login.
+  async function rawApi(path, options, token){
+    return fetch(path, {
       ...options,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? {'Authorization': 'Bearer ' + token} : {}),
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
         ...(options.headers || {}),
       },
     });
-    if (res.status === 401) {
-      clearToken();
+  }
+
+  async function api(path, options={}, _isRetry){
+    const res = await rawApi(path, options, getAccessToken());
+    if (res.status === 401 && !_isRetry) {
+      const refreshToken = getRefreshToken();
+      if (refreshToken) {
+        try {
+          const refreshRes = await fetch('/api/auth/refresh', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+          });
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            setTokens(data.accessToken, data.refreshToken);
+            return api(path, options, true);
+          }
+        } catch (e) { /* fall through to session-expired below */ }
+      }
+      clearTokens();
       showLogin();
       throw new Error('Session expired');
     }
@@ -182,23 +215,36 @@
 
   loginBtn.addEventListener('click', async () => {
     loginError.textContent = '';
+    const email = emailInput.value.trim();
     const password = passwordInput.value;
-    if (!password) return;
+    if (!email || !password) return;
     loginBtn.disabled = true;
     try {
-      const data = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
-      setToken(data.token);
+      const res = await fetch('/api/auth/login', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Sign in failed.');
+      setTokens(data.accessToken, data.refreshToken);
       passwordInput.value = '';
       showApp();
     } catch (e) {
-      loginError.textContent = 'Incorrect password.';
+      loginError.textContent = e.message || 'Incorrect email or password.';
     } finally {
       loginBtn.disabled = false;
     }
   });
   passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginBtn.click(); });
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
 
-  logoutBtn.addEventListener('click', () => { clearToken(); showLogin(); });
+  logoutBtn.addEventListener('click', async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: getRefreshToken() }) }); }
+    catch (e) { /* logging out client-side regardless is fine */ }
+    clearTokens();
+    showLogin();
+  });
 
   function renderStats(reviews){
     document.getElementById('statTotal').textContent = reviews.length;
@@ -319,7 +365,7 @@
     }
   }
 
-  if (getToken()) showApp(); else showLogin();
+  if (getAccessToken()) showApp(); else showLogin();
 })();
 </script>
 </body>
