@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reviews Admin — Infopedia Technology</title>
+<title>Admin — Infopedia Technology</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
   header{background:var(--navy-950);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;}
   header h1{font-family:var(--font-head);font-size:1.1rem;margin:0;}
   header button{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 14px;border-radius:999px;font-size:.82rem;cursor:pointer;}
-  main{max-width:820px;margin:0 auto;padding:32px 20px 80px;}
+  main{max-width:900px;margin:0 auto;padding:32px 20px 80px;}
 
   #loginView{max-width:360px;margin:80px auto;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;}
   #loginView h2{font-family:var(--font-head);font-size:1.2rem;margin:0 0 6px;}
@@ -30,8 +30,8 @@
   #loginView button{width:100%;padding:11px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--blue-500),var(--cyan-400));color:#fff;font-weight:600;font-family:var(--font-head);cursor:pointer;}
   #loginError{color:#dc2626;font-size:.82rem;min-height:1.2em;margin-top:10px;}
 
-  .stats{display:flex;gap:16px;margin-bottom:24px;}
-  .stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;flex:1;text-align:center;}
+  .stats{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+  .stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;flex:1;min-width:120px;text-align:center;}
   .stat-num{font-family:var(--font-head);font-size:1.6rem;font-weight:700;color:var(--blue-500);}
   .stat-label{font-size:.78rem;color:var(--ink-500);}
 
@@ -49,7 +49,7 @@
 
   .respond-row{display:flex;gap:10px;}
   .respond-row textarea{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.88rem;resize:vertical;min-height:44px;}
-  .admin-actions{display:flex;gap:8px;margin-top:10px;}
+  .admin-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
   .btn-sm{padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:.8rem;cursor:pointer;font-family:var(--font-head);font-weight:600;}
   .btn-sm.primary{background:var(--blue-500);border-color:var(--blue-500);color:#fff;}
   .btn-sm.danger{color:#dc2626;border-color:#fecaca;}
@@ -57,8 +57,8 @@
   #app{display:none;}
   .empty{text-align:center;color:var(--ink-500);padding:60px 0;}
 
-  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);}
-  .tab-btn{background:none;border:none;padding:10px 4px;margin-right:20px;font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--ink-500);cursor:pointer;border-bottom:2px solid transparent;}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .tab-btn{background:none;border:none;padding:10px 4px;margin-right:20px;font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--ink-500);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
   .tab-btn.active{color:var(--blue-500);border-bottom-color:var(--blue-500);}
   .tab-badge{display:inline-block;background:var(--gold-400);color:var(--ink-900);font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:6px;}
 
@@ -69,13 +69,47 @@
   .contact-who a{color:var(--blue-500);font-size:.85rem;}
   .contact-tag{display:inline-block;background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:.75rem;color:var(--ink-700);margin-top:4px;}
   .contact-message{font-size:.92rem;white-space:pre-wrap;margin:10px 0;}
+
+  .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .section-head h2{font-family:var(--font-head);font-size:1.1rem;margin:0;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:.82rem;font-weight:600;color:var(--ink-700);margin-bottom:6px;}
+  .field .hint{display:block;font-size:.76rem;font-weight:400;color:var(--ink-500);margin-top:4px;}
+  .field input[type=text],.field input[type=email],.field input[type=password],.field input[type=url],.field textarea{
+    width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;
+  }
+  .field textarea{resize:vertical;}
+  .field-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .field-row .field{flex:1;min-width:180px;}
+  .checkbox-field{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:.88rem;}
+  .checkbox-field input{width:auto;}
+  .imgpick-row{display:flex;gap:10px;align-items:center;}
+  .imgpick-row input[type=text]{flex:1;}
+  .img-preview{max-width:100%;max-height:140px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-top:8px;display:none;}
+
+  .status-pill{display:inline-block;font-size:.72rem;font-weight:700;border-radius:999px;padding:2px 10px;font-family:var(--font-head);}
+  .status-pill.published{background:#dcfce7;color:#15803d;}
+  .status-pill.draft{background:#fef3c7;color:#b45309;}
+
+  .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;}
+  .media-item{position:relative;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:#fff;}
+  .media-item img{width:100%;height:100px;object-fit:cover;display:block;cursor:pointer;}
+  .media-item .media-name{font-size:.68rem;padding:5px 6px;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .media-item .media-del{position:absolute;top:4px;right:4px;background:rgba(220,38,38,.92);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer;line-height:1;}
+
+  .upload-row{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+
+  .admins-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .admins-row:last-child{border-bottom:none;}
+  .you-tag{background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-size:.7rem;color:var(--ink-500);margin-left:6px;}
 </style>
 </head>
 <body>
 
 <div id="loginView">
   <h2>Infopedia Admin</h2>
-  <p>Sign in to view and respond to reviews and messages.</p>
+  <p>Sign in to manage the site.</p>
   <input type="email" id="emailInput" placeholder="Admin email" autocomplete="username">
   <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password">
   <button id="loginBtn">Sign in</button>
@@ -84,16 +118,20 @@
 
 <div id="app">
   <header>
-    <h1>Infopedia Technology — Reviews</h1>
+    <h1>Infopedia Technology — Admin</h1>
     <button id="logoutBtn">Sign out</button>
   </header>
   <main>
     <div class="tabs">
-      <button class="tab-btn active" id="tabReviewsBtn">Reviews</button>
-      <button class="tab-btn" id="tabContactsBtn">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
+      <button class="tab-btn active" data-tab="reviews">Reviews</button>
+      <button class="tab-btn" data-tab="contacts">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
+      <button class="tab-btn" data-tab="blog">Blog</button>
+      <button class="tab-btn" data-tab="media">Media</button>
+      <button class="tab-btn" data-tab="settings">Website</button>
+      <button class="tab-btn" data-tab="admins">Admins</button>
     </div>
 
-    <div id="reviewsTab">
+    <div class="tab-panel" id="reviewsTab">
       <div class="stats">
         <div class="stat"><div class="stat-num" id="statTotal">–</div><div class="stat-label">Total reviews</div></div>
         <div class="stat"><div class="stat-num" id="statAvg">–</div><div class="stat-label">Average rating</div></div>
@@ -102,12 +140,163 @@
       <div id="reviewsAdminList"></div>
     </div>
 
-    <div id="contactsTab" style="display:none;">
+    <div class="tab-panel" id="contactsTab" style="display:none;">
       <div class="stats">
         <div class="stat"><div class="stat-num" id="statContactTotal">–</div><div class="stat-label">Total messages</div></div>
         <div class="stat"><div class="stat-num" id="statContactUnread">–</div><div class="stat-label">Unread</div></div>
       </div>
       <div id="contactsAdminList"></div>
+    </div>
+
+    <div class="tab-panel" id="blogTab" style="display:none;">
+      <div id="blogListView">
+        <div class="section-head">
+          <h2>Blog posts</h2>
+          <button class="btn-sm primary" id="newPostBtn">New post</button>
+        </div>
+        <div id="blogAdminList"></div>
+      </div>
+
+      <div id="blogEditView" style="display:none;">
+        <div class="section-head">
+          <h2 id="blogEditTitle">New post</h2>
+          <button class="btn-sm" id="blogCancelBtn">Cancel</button>
+        </div>
+        <div class="admin-card">
+          <div class="field">
+            <label for="postTitle">Title</label>
+            <input type="text" id="postTitle">
+          </div>
+          <div class="field">
+            <label for="postSlug">URL slug</label>
+            <input type="text" id="postSlug" placeholder="auto-generated from the title if left blank">
+          </div>
+          <div class="field">
+            <label for="postExcerpt">Excerpt</label>
+            <textarea id="postExcerpt" rows="2" placeholder="A short summary shown on the blog listing page"></textarea>
+          </div>
+          <div class="field">
+            <label for="postContent">Content</label>
+            <textarea id="postContent" rows="14"></textarea>
+            <span class="hint">Plain text — leave a blank line between paragraphs.</span>
+          </div>
+          <div class="field">
+            <label>Featured image</label>
+            <div class="imgpick-row">
+              <input type="text" id="postFeaturedImage" placeholder="Image URL, or upload a file">
+              <input type="file" id="postImageUpload" accept="image/*" style="display:none;">
+              <button type="button" class="btn-sm" id="postImageUploadBtn">Upload</button>
+            </div>
+            <img id="postImagePreview" class="img-preview">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="postCategory">Category</label>
+              <input type="text" id="postCategory">
+            </div>
+            <div class="field">
+              <label for="postTags">Tags</label>
+              <input type="text" id="postTags" placeholder="comma, separated, tags">
+            </div>
+          </div>
+          <div class="field">
+            <label for="postSeoTitle">SEO title</label>
+            <input type="text" id="postSeoTitle">
+          </div>
+          <div class="field">
+            <label for="postSeoDescription">SEO description</label>
+            <textarea id="postSeoDescription" rows="2"></textarea>
+          </div>
+          <div class="checkbox-field">
+            <input type="checkbox" id="postPublished">
+            <label for="postPublished" style="margin:0;">Published (visible on the public blog)</label>
+          </div>
+          <div class="admin-actions">
+            <button class="btn-sm primary" id="postSaveBtn">Save post</button>
+          </div>
+          <p id="postError" style="color:#dc2626;font-size:.85rem;"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="mediaTab" style="display:none;">
+      <div class="section-head"><h2>Media library</h2></div>
+      <div class="upload-row">
+        <input type="file" id="mediaUploadInput" accept="image/*">
+        <button class="btn-sm primary" id="mediaUploadBtn">Upload</button>
+        <span id="mediaUploadStatus" style="font-size:.82rem;color:var(--ink-500);"></span>
+      </div>
+      <div id="mediaGrid" class="media-grid"></div>
+    </div>
+
+    <div class="tab-panel" id="settingsTab" style="display:none;">
+      <div class="section-head"><h2>Social media links</h2></div>
+      <div class="admin-card">
+        <p style="font-size:.85rem;color:var(--ink-500);margin-top:0;">These links appear in the site footer. Leave any field blank to hide that icon.</p>
+        <div class="field">
+          <label for="settingsLinkedin">LinkedIn URL</label>
+          <input type="url" id="settingsLinkedin" placeholder="https://www.linkedin.com/company/...">
+        </div>
+        <div class="field">
+          <label for="settingsFacebook">Facebook URL</label>
+          <input type="url" id="settingsFacebook" placeholder="https://www.facebook.com/...">
+        </div>
+        <div class="field">
+          <label for="settingsInstagram">Instagram URL</label>
+          <input type="url" id="settingsInstagram" placeholder="https://www.instagram.com/...">
+        </div>
+        <div class="field">
+          <label for="settingsX">X (Twitter) URL</label>
+          <input type="url" id="settingsX" placeholder="https://x.com/...">
+        </div>
+        <div class="admin-actions">
+          <button class="btn-sm primary" id="settingsSaveBtn">Save links</button>
+        </div>
+        <p id="settingsStatus" style="font-size:.85rem;"></p>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="adminsTab" style="display:none;">
+      <div class="section-head"><h2>Admin accounts</h2></div>
+      <div class="admin-card" id="adminsList"></div>
+
+      <div class="section-head"><h2>Add an admin</h2></div>
+      <div class="admin-card">
+        <div class="field-row">
+          <div class="field">
+            <label for="newAdminName">Name</label>
+            <input type="text" id="newAdminName">
+          </div>
+          <div class="field">
+            <label for="newAdminEmail">Email</label>
+            <input type="email" id="newAdminEmail">
+          </div>
+        </div>
+        <div class="field">
+          <label for="newAdminPassword">Password</label>
+          <input type="password" id="newAdminPassword" placeholder="At least 8 characters">
+        </div>
+        <div class="admin-actions">
+          <button class="btn-sm primary" id="addAdminBtn">Add admin</button>
+        </div>
+        <p id="addAdminError" style="color:#dc2626;font-size:.85rem;"></p>
+      </div>
+
+      <div class="section-head"><h2>Change my password</h2></div>
+      <div class="admin-card">
+        <div class="field">
+          <label for="curPassword">Current password</label>
+          <input type="password" id="curPassword">
+        </div>
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" placeholder="At least 8 characters">
+        </div>
+        <div class="admin-actions">
+          <button class="btn-sm primary" id="changePasswordBtn">Update password</button>
+        </div>
+        <p id="changePasswordStatus" style="font-size:.85rem;"></p>
+      </div>
     </div>
   </main>
 </div>
@@ -133,10 +322,21 @@
     sessionStorage.removeItem('infopedia_admin_access');
     sessionStorage.removeItem('infopedia_admin_refresh');
   }
+  function decodeJwtPayload(token){
+    try {
+      const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));
+    } catch(e){ return null; }
+  }
+  function getCurrentAdminId(){
+    const token = getAccessToken();
+    const payload = token ? decodeJwtPayload(token) : null;
+    return payload ? payload.sub : null;
+  }
 
   function escapeHtml(str){
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = str == null ? '' : String(str);
     return div.innerHTML;
   }
   function starString(r){ return '★'.repeat(r) + '☆'.repeat(5-r); }
@@ -149,13 +349,16 @@
   // access token, and transparently retries once via the refresh token if
   // the access token has expired — matching the same silent-refresh
   // pattern the Handa/PassNow apps use, so a session survives longer than
-  // one 2-hour access token without forcing a re-login.
+  // one 2-hour access token without forcing a re-login. FormData bodies
+  // (media uploads) are passed through untouched so the browser can set
+  // the multipart boundary itself.
   async function rawApi(path, options, token){
+    const isFormData = options.body instanceof FormData;
     return fetch(path, {
       ...options,
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
         ...(options.headers || {}),
       },
@@ -200,17 +403,33 @@
     loadContacts();
   }
 
-  const tabReviewsBtn = document.getElementById('tabReviewsBtn');
-  const tabContactsBtn = document.getElementById('tabContactsBtn');
-  const reviewsTab = document.getElementById('reviewsTab');
-  const contactsTab = document.getElementById('contactsTab');
-  tabReviewsBtn.addEventListener('click', () => {
-    tabReviewsBtn.classList.add('active'); tabContactsBtn.classList.remove('active');
-    reviewsTab.style.display = 'block'; contactsTab.style.display = 'none';
-  });
-  tabContactsBtn.addEventListener('click', () => {
-    tabContactsBtn.classList.add('active'); tabReviewsBtn.classList.remove('active');
-    contactsTab.style.display = 'block'; reviewsTab.style.display = 'none';
+  // ---- Tabs ----
+  const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+  const tabPanels = {
+    reviews: document.getElementById('reviewsTab'),
+    contacts: document.getElementById('contactsTab'),
+    blog: document.getElementById('blogTab'),
+    media: document.getElementById('mediaTab'),
+    settings: document.getElementById('settingsTab'),
+    admins: document.getElementById('adminsTab'),
+  };
+  const tabLoaders = {
+    blog: () => loadBlogPosts(),
+    media: () => loadMedia(),
+    settings: () => loadSettings(),
+    admins: () => loadAdmins(),
+  };
+  const loadedTabs = new Set();
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+      Object.keys(tabPanels).forEach(key => { tabPanels[key].style.display = key === tab ? 'block' : 'none'; });
+      if (tabLoaders[tab] && !loadedTabs.has(tab)) {
+        loadedTabs.add(tab);
+        tabLoaders[tab]();
+      }
+    });
   });
 
   loginBtn.addEventListener('click', async () => {
@@ -243,9 +462,11 @@
     try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: getRefreshToken() }) }); }
     catch (e) { /* logging out client-side regardless is fine */ }
     clearTokens();
+    loadedTabs.clear();
     showLogin();
   });
 
+  // ---- Reviews ----
   function renderStats(reviews){
     document.getElementById('statTotal').textContent = reviews.length;
     const avg = reviews.length ? (reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1) : '–';
@@ -311,6 +532,7 @@
     }
   }
 
+  // ---- Contacts ----
   const contactsListEl = document.getElementById('contactsAdminList');
   const unreadBadge = document.getElementById('unreadBadge');
 
@@ -364,6 +586,301 @@
       contactsListEl.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
     }
   }
+
+  // ---- Blog ----
+  const blogListView = document.getElementById('blogListView');
+  const blogEditView = document.getElementById('blogEditView');
+  const blogAdminList = document.getElementById('blogAdminList');
+  const blogEditTitle = document.getElementById('blogEditTitle');
+  const postError = document.getElementById('postError');
+  let editingPostId = null;
+
+  function openPostEditor(post){
+    editingPostId = post ? post.id : null;
+    blogEditTitle.textContent = post ? 'Edit post' : 'New post';
+    document.getElementById('postTitle').value = post ? post.title : '';
+    document.getElementById('postSlug').value = post ? post.slug : '';
+    document.getElementById('postExcerpt').value = post ? (post.excerpt || '') : '';
+    document.getElementById('postContent').value = post ? post.content : '';
+    document.getElementById('postFeaturedImage').value = post ? (post.featuredImage || '') : '';
+    document.getElementById('postCategory').value = post ? (post.category || '') : '';
+    document.getElementById('postTags').value = post ? (post.tags || '') : '';
+    document.getElementById('postSeoTitle').value = post ? (post.seoTitle || '') : '';
+    document.getElementById('postSeoDescription').value = post ? (post.seoDescription || '') : '';
+    document.getElementById('postPublished').checked = post ? !!post.published : false;
+    updateImagePreview();
+    postError.textContent = '';
+    blogListView.style.display = 'none';
+    blogEditView.style.display = 'block';
+  }
+  function closePostEditor(){
+    editingPostId = null;
+    blogEditView.style.display = 'none';
+    blogListView.style.display = 'block';
+  }
+  function updateImagePreview(){
+    const url = document.getElementById('postFeaturedImage').value.trim();
+    const img = document.getElementById('postImagePreview');
+    if (url) { img.src = url; img.style.display = 'block'; }
+    else { img.style.display = 'none'; }
+  }
+  document.getElementById('postFeaturedImage').addEventListener('input', updateImagePreview);
+  document.getElementById('newPostBtn').addEventListener('click', () => openPostEditor(null));
+  document.getElementById('blogCancelBtn').addEventListener('click', closePostEditor);
+
+  document.getElementById('postImageUploadBtn').addEventListener('click', () => {
+    document.getElementById('postImageUpload').click();
+  });
+  document.getElementById('postImageUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await api('/api/admin/media', { method: 'POST', body: formData });
+      document.getElementById('postFeaturedImage').value = data.media.url;
+      updateImagePreview();
+    } catch (err) {
+      postError.textContent = err.message;
+    } finally {
+      e.target.value = '';
+    }
+  });
+
+  document.getElementById('postSaveBtn').addEventListener('click', async () => {
+    postError.textContent = '';
+    const body = {
+      title: document.getElementById('postTitle').value.trim(),
+      slug: document.getElementById('postSlug').value.trim(),
+      excerpt: document.getElementById('postExcerpt').value.trim(),
+      content: document.getElementById('postContent').value.trim(),
+      featuredImage: document.getElementById('postFeaturedImage').value.trim(),
+      category: document.getElementById('postCategory').value.trim(),
+      tags: document.getElementById('postTags').value.trim(),
+      seoTitle: document.getElementById('postSeoTitle').value.trim(),
+      seoDescription: document.getElementById('postSeoDescription').value.trim(),
+      published: document.getElementById('postPublished').checked,
+    };
+    if (!body.title || !body.content) {
+      postError.textContent = 'Title and content are required.';
+      return;
+    }
+    try {
+      if (editingPostId) {
+        await api(`/api/admin/blog/${editingPostId}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await api('/api/admin/blog', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closePostEditor();
+      loadBlogPosts();
+    } catch (e) {
+      postError.textContent = e.message;
+    }
+  });
+
+  function renderBlogList(posts){
+    if (!posts.length) {
+      blogAdminList.innerHTML = '<p class="empty">No posts yet.</p>';
+      return;
+    }
+    blogAdminList.innerHTML = posts.map(p => `
+      <div class="admin-card" data-id="${p.id}">
+        <div class="admin-head">
+          <strong>${escapeHtml(p.title)}</strong>
+          <span class="status-pill ${p.published ? 'published' : 'draft'}">${p.published ? 'Published' : 'Draft'}</span>
+        </div>
+        <p class="admin-meta">${p.category ? escapeHtml(p.category) + ' · ' : ''}${formatDate(p.publishedAt || p.createdAt)}</p>
+        <div class="admin-actions">
+          <button class="btn-sm editBtn">Edit</button>
+          <button class="btn-sm danger deleteBtn">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    blogAdminList.querySelectorAll('.admin-card').forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('.editBtn').addEventListener('click', async () => {
+        try {
+          const data = await api(`/api/admin/blog/${id}`);
+          openPostEditor(data.post);
+        } catch (e) { alert(e.message); }
+      });
+      card.querySelector('.deleteBtn').addEventListener('click', async () => {
+        if (!confirm('Delete this post? This cannot be undone.')) return;
+        try {
+          await api(`/api/admin/blog/${id}`, { method: 'DELETE' });
+          loadBlogPosts();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadBlogPosts(){
+    try {
+      const data = await api('/api/admin/blog');
+      renderBlogList(data.posts);
+    } catch (e) {
+      blogAdminList.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  // ---- Media ----
+  const mediaGrid = document.getElementById('mediaGrid');
+  const mediaUploadStatus = document.getElementById('mediaUploadStatus');
+
+  function renderMedia(items){
+    if (!items.length) {
+      mediaGrid.innerHTML = '<p class="empty">No uploads yet.</p>';
+      return;
+    }
+    mediaGrid.innerHTML = items.map(m => `
+      <div class="media-item" data-id="${m.id}" data-url="${escapeHtml(m.url)}">
+        <img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.filename)}" title="Click to copy URL">
+        <button class="media-del" title="Delete">×</button>
+        <div class="media-name">${escapeHtml(m.filename)}</div>
+      </div>
+    `).join('');
+
+    mediaGrid.querySelectorAll('.media-item').forEach(item => {
+      const id = item.dataset.id;
+      item.querySelector('img').addEventListener('click', () => {
+        navigator.clipboard?.writeText(item.dataset.url).catch(() => {});
+        mediaUploadStatus.textContent = 'Image URL copied.';
+        setTimeout(() => { mediaUploadStatus.textContent = ''; }, 2000);
+      });
+      item.querySelector('.media-del').addEventListener('click', async () => {
+        if (!confirm('Delete this file?')) return;
+        try {
+          await api(`/api/admin/media/${id}`, { method: 'DELETE' });
+          loadMedia();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadMedia(){
+    try {
+      const data = await api('/api/admin/media');
+      renderMedia(data.media);
+    } catch (e) {
+      mediaGrid.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  document.getElementById('mediaUploadBtn').addEventListener('click', async () => {
+    const input = document.getElementById('mediaUploadInput');
+    const file = input.files[0];
+    if (!file) return;
+    mediaUploadStatus.textContent = 'Uploading…';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api('/api/admin/media', { method: 'POST', body: formData });
+      input.value = '';
+      mediaUploadStatus.textContent = '';
+      loadMedia();
+    } catch (e) {
+      mediaUploadStatus.textContent = e.message;
+    }
+  });
+
+  // ---- Website settings ----
+  const settingsStatus = document.getElementById('settingsStatus');
+
+  async function loadSettings(){
+    try {
+      const data = await api('/api/admin/site-settings');
+      document.getElementById('settingsLinkedin').value = data.settings.linkedinUrl || '';
+      document.getElementById('settingsFacebook').value = data.settings.facebookUrl || '';
+      document.getElementById('settingsInstagram').value = data.settings.instagramUrl || '';
+      document.getElementById('settingsX').value = data.settings.xUrl || '';
+    } catch (e) {
+      settingsStatus.textContent = e.message;
+    }
+  }
+
+  document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
+    settingsStatus.textContent = '';
+    try {
+      await api('/api/admin/site-settings', { method: 'PUT', body: JSON.stringify({
+        linkedinUrl: document.getElementById('settingsLinkedin').value.trim(),
+        facebookUrl: document.getElementById('settingsFacebook').value.trim(),
+        instagramUrl: document.getElementById('settingsInstagram').value.trim(),
+        xUrl: document.getElementById('settingsX').value.trim(),
+      }) });
+      settingsStatus.style.color = '#15803d';
+      settingsStatus.textContent = 'Saved.';
+    } catch (e) {
+      settingsStatus.style.color = '#dc2626';
+      settingsStatus.textContent = e.message;
+    }
+  });
+
+  // ---- Admins ----
+  const adminsList = document.getElementById('adminsList');
+  const addAdminError = document.getElementById('addAdminError');
+  const changePasswordStatus = document.getElementById('changePasswordStatus');
+
+  async function loadAdmins(){
+    try {
+      const data = await api('/api/admin/admins');
+      const myId = getCurrentAdminId();
+      adminsList.innerHTML = data.admins.map(a => `
+        <div class="admins-row" data-id="${a.id}">
+          <div>
+            <strong>${escapeHtml(a.name)}</strong>${a.id === myId ? '<span class="you-tag">You</span>' : ''}<br>
+            <span class="admin-meta">${escapeHtml(a.email)}</span>
+          </div>
+          ${a.id === myId ? '' : `<button class="btn-sm danger removeAdminBtn">Remove</button>`}
+        </div>
+      `).join('');
+
+      adminsList.querySelectorAll('.removeAdminBtn').forEach(btn => {
+        const row = btn.closest('.admins-row');
+        btn.addEventListener('click', async () => {
+          if (!confirm('Remove this admin account?')) return;
+          try {
+            await api(`/api/admin/admins/${row.dataset.id}`, { method: 'DELETE' });
+            loadAdmins();
+          } catch (e) { alert(e.message); }
+        });
+      });
+    } catch (e) {
+      adminsList.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  document.getElementById('addAdminBtn').addEventListener('click', async () => {
+    addAdminError.textContent = '';
+    const name = document.getElementById('newAdminName').value.trim();
+    const email = document.getElementById('newAdminEmail').value.trim();
+    const password = document.getElementById('newAdminPassword').value;
+    try {
+      await api('/api/admin/admins', { method: 'POST', body: JSON.stringify({ name, email, password }) });
+      document.getElementById('newAdminName').value = '';
+      document.getElementById('newAdminEmail').value = '';
+      document.getElementById('newAdminPassword').value = '';
+      loadAdmins();
+    } catch (e) {
+      addAdminError.textContent = e.message;
+    }
+  });
+
+  document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+    changePasswordStatus.textContent = '';
+    const currentPassword = document.getElementById('curPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    try {
+      await api('/api/admin/me/password', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword }) });
+      document.getElementById('curPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      changePasswordStatus.style.color = '#15803d';
+      changePasswordStatus.textContent = 'Password updated.';
+    } catch (e) {
+      changePasswordStatus.style.color = '#dc2626';
+      changePasswordStatus.textContent = e.message;
+    }
+  });
 
   if (getAccessToken()) showApp(); else showLogin();
 })();

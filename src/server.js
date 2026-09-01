@@ -15,6 +15,9 @@ const authRoutes = require('./routes/auth.routes');
 const reviewsRoutes = require('./routes/reviews.routes');
 const contactRoutes = require('./routes/contact.routes');
 const adminRoutes = require('./routes/admin.routes');
+const blogRoutes = require('./routes/blog.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const storage = require('./services/storage.service');
 
 const root = path.join(__dirname, '..');
 const app = express();
@@ -53,9 +56,13 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().t
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/site-settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 
+storage.ensureUploadsDir();
 app.use('/assets', express.static(path.join(root, 'assets')));
+app.use('/uploads', express.static(storage.uploadsDir));
 app.use(express.static(root, { index: 'index.html' }));
 
 app.use('/api', notFoundHandler);

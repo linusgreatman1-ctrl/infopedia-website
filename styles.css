@@ -353,9 +353,29 @@ button{font-family:inherit;}
 .office-soon{background:var(--paper-50);border-style:dashed;}
 
 /* ============ Footer ============ */
+/* ============ Blog ============ */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:28px;}
+.blog-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md);color:inherit;transition:transform .15s;}
+.blog-card:hover{transform:translateY(-3px);}
+.blog-card-img{height:170px;background:linear-gradient(135deg,var(--navy-900),var(--blue-500));background-size:cover;background-position:center;}
+.blog-card-body{padding:20px 22px 24px;}
+.blog-card-body h3{font-size:1.08rem;margin:8px 0 6px;}
+.blog-card-body p{font-size:.88rem;color:var(--ink-500);margin:0 0 10px;}
+.blog-tag{display:inline-block;background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:3px 11px;font-size:.72rem;font-weight:600;font-family:var(--font-head);color:var(--blue-500);margin:0 6px 6px 0;}
+.blog-meta{font-size:.78rem;color:var(--ink-500);}
+.blog-empty{color:var(--ink-500);padding:20px 0;}
+.blog-back{display:inline-block;margin-bottom:24px;font-size:.9rem;color:var(--blue-500);font-weight:600;}
+.post-hero-img{width:100%;max-height:420px;object-fit:cover;border-radius:var(--radius-lg);margin:18px 0;}
+.post-body p{font-size:1.02rem;line-height:1.75;color:var(--ink-700);}
+.post-tags{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+
 .site-footer{background:var(--navy-950);color:#9aa6c2;padding-top:56px;}
 .footer-inner{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1);}
 .footer-brand p{max-width:340px;font-size:.88rem;color:#8b96b8;margin-top:10px;}
+.footer-social{display:flex;gap:10px;margin-top:18px;}
+.social-icon{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;color:#c3cbe3;transition:background .15s,color .15s,border-color .15s;}
+.social-icon svg{width:16px;height:16px;}
+.social-icon:hover{background:var(--blue-500);border-color:var(--blue-500);color:#fff;}
 .footer-nav{display:flex;gap:22px;flex-wrap:wrap;align-content:flex-start;}
 .footer-nav a{font-size:.88rem;color:#c3cbe3;}
 .footer-nav a:hover{color:var(--cyan-400);}

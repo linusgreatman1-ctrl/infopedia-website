@@ -22,6 +22,7 @@ model AdminUser {
 
   refreshTokens   RefreshToken[]
   reviewResponses Review[]         @relation("ReviewResponder")
+  blogPosts       BlogPost[]
 }
 
 model RefreshToken {
@@ -69,4 +70,52 @@ model ContactMessage {
   createdAt DateTime @default(now())
 
   @@index([read])
+}
+
+// A blog/news article, written and published from the admin dashboard.
+model BlogPost {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  excerpt        String?
+  content        String
+  featuredImage  String?
+  category       String?
+  tags           String? // comma-separated
+  seoTitle       String?
+  seoDescription String?
+
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+
+  authorId   String?
+  author     AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String // snapshot, kept even if the admin account is later removed
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+}
+
+// An uploaded image/file, tracked so the admin dashboard can list and
+// reuse it (e.g. as a blog post's featured image) without re-uploading.
+model Media {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+}
+
+// Site-wide settings editable from the admin dashboard. Always exactly one
+// row (id "singleton"), upserted rather than created per-request.
+model SiteSettings {
+  id           String   @id @default("singleton")
+  linkedinUrl  String?
+  facebookUrl  String?
+  instagramUrl String?
+  xUrl         String?
+  updatedAt    DateTime @updatedAt
 }

@@ -8,6 +8,10 @@ function errorHandler(err, req, res, next) {
   if (err.code === 'P2025') {
     return res.status(404).json({ error: 'Record not found.' });
   }
+  if (err.name === 'MulterError') {
+    const message = err.code === 'LIMIT_FILE_SIZE' ? 'File is too large (max 8MB).' : err.message;
+    return res.status(400).json({ error: message });
+  }
 
   const status = err.status || 500;
   const message =

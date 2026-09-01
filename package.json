@@ -2,7 +2,7 @@
   "name": "infopedia-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Infopedia Technology marketing site + backend (reviews, contact form, admin panel) — Express + PostgreSQL/Prisma",
+  "description": "Infopedia Technology marketing site + CMS backend (blog, media, reviews, contact form, admin dashboard) — Express + PostgreSQL/Prisma",
   "main": "src/server.js",
   "scripts": {
     "start": "npx prisma migrate deploy && node src/server.js",
@@ -29,6 +29,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "multer": "^2.3.0",
     "nodemailer": "^9.1.0"
   },
   "devDependencies": {

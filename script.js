@@ -1,5 +1,23 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
+// Social links — populated from the CMS; each icon stays hidden until its
+// URL is set from the admin dashboard.
+fetch('/api/site-settings').then(r => r.ok ? r.json() : null).then(data => {
+  if (!data || !data.settings) return;
+  const map = {
+    socialLinkedin: data.settings.linkedinUrl,
+    socialFacebook: data.settings.facebookUrl,
+    socialInstagram: data.settings.instagramUrl,
+    socialX: data.settings.xUrl,
+  };
+  Object.keys(map).forEach(id => {
+    const url = map[id];
+    if (!url) return;
+    const el = document.getElementById(id);
+    if (el) { el.href = url; el.style.display = 'flex'; }
+  });
+}).catch(() => {});
+
 // Mobile nav toggle
 const navToggle = document.getElementById('navToggle');
 const header = document.querySelector('.site-header');
