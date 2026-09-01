@@ -8,6 +8,7 @@ const mediaCtrl = require('../controllers/media.controller');
 const settingsCtrl = require('../controllers/settings.controller');
 const adminUsersCtrl = require('../controllers/adminUsers.controller');
 const filesCtrl = require('../controllers/files.controller');
+const testimonialsCtrl = require('../controllers/testimonials.controller');
 
 const router = express.Router();
 router.use(requireAdminAuth);
@@ -40,6 +41,11 @@ router.delete('/media/:id', mediaCtrl.deleteMedia);
 
 router.get('/site-settings', settingsCtrl.getSettingsForAdmin);
 router.put('/site-settings', settingsCtrl.updateSettings);
+
+router.get('/testimonials', testimonialsCtrl.listTestimonialsForAdmin);
+router.post('/testimonials', testimonialsCtrl.createTestimonial);
+router.put('/testimonials/:id', testimonialsCtrl.updateTestimonial);
+router.delete('/testimonials/:id', testimonialsCtrl.deleteTestimonial);
 
 router.get('/admins', adminUsersCtrl.listAdmins);
 router.post('/admins', adminUsersCtrl.createAdmin);

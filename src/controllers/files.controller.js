@@ -20,6 +20,7 @@ const EDITABLE_FILES = {
   'styles.css': path.join(ROOT, 'styles.css'),
   'script.js': path.join(ROOT, 'script.js'),
   'reviews.js': path.join(ROOT, 'reviews.js'),
+  'testimonials.js': path.join(ROOT, 'testimonials.js'),
 };
 
 function resolveFile(key) {

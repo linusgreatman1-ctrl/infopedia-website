@@ -115,6 +115,13 @@
   .match-row mark{background:#fde68a;color:var(--ink-900);padding:0 2px;border-radius:3px;}
   .files-table{width:100%;border-collapse:collapse;font-size:.82rem;}
   .files-table th,.files-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+
+  .pw-field{position:relative;}
+  .pw-field input{padding-right:40px !important;}
+  #loginView .pw-toggle,
+  .pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:auto;height:auto;background:none;border:none;cursor:pointer;padding:6px;margin:0;border-radius:0;color:var(--ink-500);display:flex;align-items:center;justify-content:center;}
+  .pw-toggle:hover{color:var(--ink-900);}
+  .pw-toggle svg{width:18px;height:18px;}
 </style>
 </head>
 <body>
@@ -123,7 +130,10 @@
   <h2>Infopedia Admin</h2>
   <p>Sign in to manage the site.</p>
   <input type="email" id="emailInput" placeholder="Admin email" autocomplete="username">
-  <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password">
+  <div class="pw-field">
+    <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password">
+    <button type="button" class="pw-toggle" data-target="passwordInput" aria-label="Show password"></button>
+  </div>
   <button id="loginBtn">Sign in</button>
   <p id="loginError"></p>
 </div>
@@ -138,6 +148,7 @@
       <button class="tab-btn active" data-tab="reviews">Reviews</button>
       <button class="tab-btn" data-tab="contacts">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
       <button class="tab-btn" data-tab="blog">Blog</button>
+      <button class="tab-btn" data-tab="testimonials">Testimonials</button>
       <button class="tab-btn" data-tab="media">Media</button>
       <button class="tab-btn" data-tab="settings">Website</button>
       <button class="tab-btn" data-tab="admins">Admins</button>
@@ -234,6 +245,58 @@
       </div>
     </div>
 
+    <div class="tab-panel" id="testimonialsTab" style="display:none;">
+      <div id="testimonialsListView">
+        <div class="section-head">
+          <h2>Testimonials</h2>
+          <button class="btn-sm primary" id="newTestimonialBtn">New testimonial</button>
+        </div>
+        <div id="testimonialsAdminList"></div>
+      </div>
+
+      <div id="testimonialEditView" style="display:none;">
+        <div class="section-head">
+          <h2 id="testimonialEditTitle">New testimonial</h2>
+          <button class="btn-sm" id="testimonialCancelBtn">Cancel</button>
+        </div>
+        <div class="admin-card">
+          <div class="field">
+            <label for="tQuote">Quote</label>
+            <textarea id="tQuote" rows="4"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="tName">Name</label>
+              <input type="text" id="tName">
+            </div>
+            <div class="field">
+              <label for="tAvatar">Avatar initials</label>
+              <input type="text" id="tAvatar" maxlength="4" placeholder="auto-generated from name if left blank">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="tRole">Role</label>
+              <input type="text" id="tRole" placeholder="e.g. Operations Manager">
+            </div>
+            <div class="field">
+              <label for="tCompany">Company</label>
+              <input type="text" id="tCompany">
+            </div>
+          </div>
+          <div class="field">
+            <label for="tPosition">Display order</label>
+            <input type="text" id="tPosition" inputmode="numeric" placeholder="0">
+            <span class="hint">Lower numbers show first.</span>
+          </div>
+          <div class="admin-actions">
+            <button class="btn-sm primary" id="testimonialSaveBtn">Save testimonial</button>
+          </div>
+          <p id="testimonialError" style="color:#dc2626;font-size:.85rem;"></p>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-panel" id="mediaTab" style="display:none;">
       <div class="section-head"><h2>Media library</h2></div>
       <div class="upload-row">
@@ -289,7 +352,10 @@
         </div>
         <div class="field">
           <label for="newAdminPassword">Password</label>
-          <input type="password" id="newAdminPassword" placeholder="At least 8 characters">
+          <div class="pw-field">
+            <input type="password" id="newAdminPassword" placeholder="At least 8 characters">
+            <button type="button" class="pw-toggle" data-target="newAdminPassword" aria-label="Show password"></button>
+          </div>
         </div>
         <div class="admin-actions">
           <button class="btn-sm primary" id="addAdminBtn">Add admin</button>
@@ -301,11 +367,17 @@
       <div class="admin-card">
         <div class="field">
           <label for="curPassword">Current password</label>
-          <input type="password" id="curPassword">
+          <div class="pw-field">
+            <input type="password" id="curPassword">
+            <button type="button" class="pw-toggle" data-target="curPassword" aria-label="Show password"></button>
+          </div>
         </div>
         <div class="field">
           <label for="newPassword">New password</label>
-          <input type="password" id="newPassword" placeholder="At least 8 characters">
+          <div class="pw-field">
+            <input type="password" id="newPassword" placeholder="At least 8 characters">
+            <button type="button" class="pw-toggle" data-target="newPassword" aria-label="Show password"></button>
+          </div>
         </div>
         <div class="admin-actions">
           <button class="btn-sm primary" id="changePasswordBtn">Update password</button>
@@ -395,6 +467,21 @@
     div.textContent = str == null ? '' : String(str);
     return div.innerHTML;
   }
+
+  // ---- Password-visibility toggles ----
+  const EYE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-7-11-7a19.42 19.42 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 7 11 7a19.5 19.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.innerHTML = EYE_ICON;
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.innerHTML = showing ? EYE_ICON : EYE_OFF_ICON;
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+  });
   function starString(r){ return '★'.repeat(r) + '☆'.repeat(5-r); }
   function formatDate(iso){
     try { return new Date(iso).toLocaleString(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
@@ -465,6 +552,7 @@
     reviews: document.getElementById('reviewsTab'),
     contacts: document.getElementById('contactsTab'),
     blog: document.getElementById('blogTab'),
+    testimonials: document.getElementById('testimonialsTab'),
     media: document.getElementById('mediaTab'),
     settings: document.getElementById('settingsTab'),
     admins: document.getElementById('adminsTab'),
@@ -474,6 +562,7 @@
   };
   const tabLoaders = {
     blog: () => loadBlogPosts(),
+    testimonials: () => loadTestimonials(),
     media: () => loadMedia(),
     settings: () => loadSettings(),
     admins: () => loadAdmins(),
@@ -783,6 +872,108 @@
       renderBlogList(data.posts);
     } catch (e) {
       blogAdminList.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
+  // ---- Testimonials ----
+  const testimonialsListView = document.getElementById('testimonialsListView');
+  const testimonialEditView = document.getElementById('testimonialEditView');
+  const testimonialsAdminList = document.getElementById('testimonialsAdminList');
+  const testimonialEditTitle = document.getElementById('testimonialEditTitle');
+  const testimonialError = document.getElementById('testimonialError');
+  let editingTestimonialId = null;
+
+  function openTestimonialEditor(t){
+    editingTestimonialId = t ? t.id : null;
+    testimonialEditTitle.textContent = t ? 'Edit testimonial' : 'New testimonial';
+    document.getElementById('tQuote').value = t ? t.quote : '';
+    document.getElementById('tName').value = t ? t.name : '';
+    document.getElementById('tAvatar').value = t ? (t.avatar || '') : '';
+    document.getElementById('tRole').value = t ? (t.role || '') : '';
+    document.getElementById('tCompany').value = t ? (t.company || '') : '';
+    document.getElementById('tPosition').value = t ? String(t.position) : '0';
+    testimonialError.textContent = '';
+    testimonialsListView.style.display = 'none';
+    testimonialEditView.style.display = 'block';
+  }
+  function closeTestimonialEditor(){
+    editingTestimonialId = null;
+    testimonialEditView.style.display = 'none';
+    testimonialsListView.style.display = 'block';
+  }
+  document.getElementById('newTestimonialBtn').addEventListener('click', () => openTestimonialEditor(null));
+  document.getElementById('testimonialCancelBtn').addEventListener('click', closeTestimonialEditor);
+
+  document.getElementById('testimonialSaveBtn').addEventListener('click', async () => {
+    testimonialError.textContent = '';
+    const body = {
+      quote: document.getElementById('tQuote').value.trim(),
+      name: document.getElementById('tName').value.trim(),
+      avatar: document.getElementById('tAvatar').value.trim(),
+      role: document.getElementById('tRole').value.trim(),
+      company: document.getElementById('tCompany').value.trim(),
+      position: parseInt(document.getElementById('tPosition').value, 10) || 0,
+    };
+    if (!body.quote || !body.name) {
+      testimonialError.textContent = 'Quote and name are required.';
+      return;
+    }
+    try {
+      if (editingTestimonialId) {
+        await api(`/api/admin/testimonials/${editingTestimonialId}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await api('/api/admin/testimonials', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closeTestimonialEditor();
+      loadTestimonials();
+    } catch (e) {
+      testimonialError.textContent = e.message;
+    }
+  });
+
+  function renderTestimonialsList(items){
+    if (!items.length) {
+      testimonialsAdminList.innerHTML = '<p class="empty">No testimonials yet.</p>';
+      return;
+    }
+    testimonialsAdminList.innerHTML = items.map(t => `
+      <div class="admin-card" data-id="${t.id}">
+        <div class="admin-head">
+          <span class="admin-stars" style="color:var(--ink-500);font-size:.78rem;font-family:var(--font-head);font-weight:600;">#${t.position}</span>
+          <span class="admin-meta">${escapeHtml(t.avatar || '')}</span>
+        </div>
+        <p class="admin-comment">"${escapeHtml(t.quote)}"</p>
+        <p class="admin-author"><strong>${escapeHtml(t.name)}</strong>${[t.role, t.company].filter(Boolean).length ? ' &middot; ' + [t.role, t.company].filter(Boolean).map(escapeHtml).join(', ') : ''}</p>
+        <div class="admin-actions">
+          <button class="btn-sm editBtn">Edit</button>
+          <button class="btn-sm danger deleteBtn">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    testimonialsAdminList.querySelectorAll('.admin-card').forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('.editBtn').addEventListener('click', () => {
+        const t = window.__testimonialsCache.find(x => x.id === id);
+        if (t) openTestimonialEditor(t);
+      });
+      card.querySelector('.deleteBtn').addEventListener('click', async () => {
+        if (!confirm('Delete this testimonial? This cannot be undone.')) return;
+        try {
+          await api(`/api/admin/testimonials/${id}`, { method: 'DELETE' });
+          loadTestimonials();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadTestimonials(){
+    try {
+      const data = await api('/api/admin/testimonials');
+      window.__testimonialsCache = data.testimonials;
+      renderTestimonialsList(data.testimonials);
+    } catch (e) {
+      testimonialsAdminList.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
     }
   }
 

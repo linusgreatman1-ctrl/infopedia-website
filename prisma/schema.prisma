@@ -119,3 +119,21 @@ model SiteSettings {
   xUrl         String?
   updatedAt    DateTime @updatedAt
 }
+
+// A client testimonial shown on the homepage. Admin-authored (unlike
+// Review, which visitors submit themselves), so every row is shown — no
+// moderation flag needed.
+model Testimonial {
+  id       String  @id @default(uuid())
+  quote    String
+  name     String
+  role     String?
+  company  String?
+  avatar   String? // 2-letter initials shown in the avatar circle; derived from name if left blank
+  position Int     @default(0) // display order, ascending
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+}
