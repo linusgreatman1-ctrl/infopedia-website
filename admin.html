@@ -143,6 +143,7 @@
       <button class="tab-btn" data-tab="admins">Admins</button>
       <button class="tab-btn" data-tab="codeeditor">Code Editor</button>
       <button class="tab-btn" data-tab="codes">Codes</button>
+      <button class="tab-btn" data-tab="preview">Live Preview</button>
     </div>
 
     <div class="tab-panel" id="reviewsTab">
@@ -341,6 +342,18 @@
       <p id="codesError" style="color:#dc2626;font-size:.85rem;"></p>
       <textarea id="codesTextarea" class="code-textarea code-mono" placeholder="Click Load to fetch the file's current contents…"></textarea>
     </div>
+
+    <div class="tab-panel" id="previewTab" style="display:none;">
+      <div class="section-head"><h2>Live Preview</h2></div>
+      <p class="tab-intro">Embeds the real page so you can check a change visually right after a Code Editor / Codes edit, without leaving the admin panel.</p>
+      <div class="toolbar">
+        <select id="previewFile"></select>
+        <select id="previewJump" style="display:none;"></select>
+        <button class="btn-sm" id="previewReloadBtn">Reload</button>
+        <a id="previewOpenLink" href="#" target="_blank" rel="noopener" class="btn-sm" style="text-decoration:none;">Open in new tab ↗</a>
+      </div>
+      <iframe id="previewFrame" style="width:100%;height:75vh;border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;"></iframe>
+    </div>
   </main>
 </div>
 
@@ -457,6 +470,7 @@
     admins: document.getElementById('adminsTab'),
     codeeditor: document.getElementById('codeeditorTab'),
     codes: document.getElementById('codesTab'),
+    preview: document.getElementById('previewTab'),
   };
   const tabLoaders = {
     blog: () => loadBlogPosts(),
@@ -465,6 +479,7 @@
     admins: () => loadAdmins(),
     codeeditor: () => initCodeEditorTab(),
     codes: () => initCodesTab(),
+    preview: () => initPreviewTab(),
   };
   const loadedTabs = new Set();
   tabButtons.forEach(btn => {
@@ -1156,6 +1171,47 @@
     } catch (e) {
       errEl.textContent = e.message;
     }
+  }
+
+  // ---- Live Preview ----
+  const PREVIEW_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html'];
+  const PREVIEW_SECTIONS = [
+    { label: 'About', anchor: 'about' },
+    { label: 'Services', anchor: 'services' },
+    { label: 'Expertise', anchor: 'expertise' },
+    { label: 'Products', anchor: 'products' },
+    { label: 'Team', anchor: 'team' },
+    { label: 'Tech Academy', anchor: 'academy' },
+    { label: 'Testimonials', anchor: 'testimonials' },
+    { label: 'Reviews', anchor: 'reviews' },
+    { label: 'Contact', anchor: 'contact' },
+  ];
+  let previewFile = 'index.html';
+
+  function initPreviewTab(){
+    document.getElementById('previewFile').innerHTML = PREVIEW_FILES.map(f => `<option value="${f}">${f}</option>`).join('');
+    document.getElementById('previewFile').value = previewFile;
+    document.getElementById('previewFile').addEventListener('change', (e) => {
+      previewFile = e.target.value;
+      previewUpdateJumpVisibility();
+      previewLoad();
+    });
+    document.getElementById('previewJump').addEventListener('change', previewLoad);
+    document.getElementById('previewReloadBtn').addEventListener('click', previewLoad);
+    document.getElementById('previewJump').innerHTML = '<option value="">Jump to section…</option>' + PREVIEW_SECTIONS.map(s => `<option value="${s.anchor}">${s.label}</option>`).join('');
+    previewUpdateJumpVisibility();
+    previewLoad();
+  }
+
+  function previewUpdateJumpVisibility(){
+    document.getElementById('previewJump').style.display = previewFile === 'index.html' ? '' : 'none';
+  }
+
+  function previewLoad(){
+    const jump = document.getElementById('previewJump').value;
+    const hash = (previewFile === 'index.html' && jump) ? '#' + jump : '';
+    document.getElementById('previewFrame').src = '/' + previewFile + '?preview=' + Date.now() + hash;
+    document.getElementById('previewOpenLink').href = '/' + previewFile + hash;
   }
 
   if (getAccessToken()) showApp(); else showLogin();
