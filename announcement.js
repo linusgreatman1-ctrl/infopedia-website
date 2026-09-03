@@ -9,14 +9,25 @@
     return 'infopedia_dismissed_announcement_' + id;
   }
 
+  const KIND_LABELS = {
+    news: 'News',
+    circular: 'Circular',
+    update: 'Update',
+    advertisement: 'Advertisement',
+    warning: 'Warning',
+    announcement: 'Announcement',
+  };
+
   function showAnnouncement(a) {
+    const label = KIND_LABELS[a.kind] || 'News';
+    const tagClass = a.kind && a.kind !== 'news' ? ' is-' + a.kind : '';
     const backdrop = document.createElement('div');
     backdrop.className = 'announce-backdrop';
     backdrop.innerHTML = `
-      <div class="announce-card" role="dialog" aria-modal="true" aria-label="${a.kind === 'circular' ? 'Circular' : 'News'}">
+      <div class="announce-card" role="dialog" aria-modal="true" aria-label="${label}">
         <button class="announce-close" aria-label="Close">&times;</button>
         ${a.image ? `<img class="announce-image" src="${escapeHtml(a.image)}" alt="">` : ''}
-        <span class="announce-tag${a.kind === 'circular' ? ' is-circular' : ''}">${a.kind === 'circular' ? 'Circular' : 'News'}</span>
+        <span class="announce-tag${tagClass}">${label}</span>
         <h3>${escapeHtml(a.title)}</h3>
         <p>${escapeHtml(a.message)}</p>
       </div>

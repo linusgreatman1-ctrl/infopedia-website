@@ -18,8 +18,10 @@ async function listForAdmin(req, res, next) {
   }
 }
 
+const KINDS = ['news', 'circular', 'update', 'advertisement', 'warning', 'announcement'];
+
 function readBody(req) {
-  const kind = req.body.kind === 'circular' ? 'circular' : 'news';
+  const kind = KINDS.includes(req.body.kind) ? req.body.kind : 'news';
   const title = String(req.body.title || '').trim().slice(0, 150);
   const message = String(req.body.message || '').trim().slice(0, 1000);
   const image = String(req.body.image || '').trim().slice(0, 500) || null;

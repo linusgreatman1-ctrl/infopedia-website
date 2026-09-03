@@ -436,6 +436,10 @@ button{font-family:inherit;}
   padding:5px 12px;border-radius:999px;margin-bottom:14px;
 }
 .announce-tag.is-circular{background:var(--gold-400);color:var(--ink-900);}
+.announce-tag.is-update{background:var(--cyan-400);color:var(--ink-900);}
+.announce-tag.is-advertisement{background:var(--navy-700);color:#fff;}
+.announce-tag.is-warning{background:#dc2626;color:#fff;}
+.announce-tag.is-announcement{background:var(--ink-700);color:#fff;}
 .announce-card h3{font-size:1.25rem;margin-bottom:10px;}
 .announce-card p{color:var(--ink-700);white-space:pre-wrap;margin-bottom:0;}
 .announce-close{

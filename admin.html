@@ -319,6 +319,10 @@
             <select id="aKind">
               <option value="news">News</option>
               <option value="circular">Circular</option>
+              <option value="update">Update</option>
+              <option value="advertisement">Advertisement</option>
+              <option value="warning">Warning</option>
+              <option value="announcement">Announcement</option>
             </select>
           </div>
           <div class="field">
@@ -1107,6 +1111,14 @@
     }
   });
 
+  const ANNOUNCEMENT_KIND_COLORS = {
+    news: 'var(--blue-500)',
+    circular: 'var(--gold-400)',
+    update: 'var(--cyan-400)',
+    advertisement: 'var(--navy-900)',
+    warning: '#dc2626',
+    announcement: 'var(--ink-700)',
+  };
   function renderAnnouncementsList(items){
     if (!items.length) {
       announcementsAdminList.innerHTML = '<p class="empty">No announcements yet.</p>';
@@ -1115,7 +1127,7 @@
     announcementsAdminList.innerHTML = items.map(a => `
       <div class="admin-card ${a.active ? '' : 'is-hidden'}" data-id="${a.id}">
         <div class="admin-head">
-          <span class="admin-stars" style="color:${a.kind === 'circular' ? 'var(--gold-400)' : 'var(--blue-500)'};font-size:.72rem;font-family:var(--font-head);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(a.kind)}</span>
+          <span class="admin-stars" style="color:${ANNOUNCEMENT_KIND_COLORS[a.kind] || 'var(--blue-500)'};font-size:.72rem;font-family:var(--font-head);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(a.kind)}</span>
           <span class="admin-meta">${formatDate(a.createdAt)}${a.active ? ' · Live on site' : ''}</span>
         </div>
         <p class="admin-comment" style="font-style:normal;font-weight:600;">"${escapeHtml(a.title)}"</p>
