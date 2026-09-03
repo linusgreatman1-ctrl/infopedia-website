@@ -414,3 +414,29 @@ button{font-family:inherit;}
   .service-thumb{width:40px;height:40px;border-radius:10px;}
   .service-title{font-size:1.05rem;}
 }
+
+/* ============ Announcement card ============ */
+.announce-backdrop{
+  position:fixed;inset:0;background:rgba(5,10,22,.6);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:announceFadeIn .2s ease-out;
+}
+@keyframes announceFadeIn{from{opacity:0;}to{opacity:1;}}
+.announce-card{
+  position:relative;max-width:440px;width:100%;background:#fff;border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);padding:32px 28px 28px;
+}
+.announce-tag{
+  display:inline-block;font-family:var(--font-head);font-size:.7rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--blue-500);
+  padding:5px 12px;border-radius:999px;margin-bottom:14px;
+}
+.announce-tag.is-circular{background:var(--gold-400);color:var(--ink-900);}
+.announce-card h3{font-size:1.25rem;margin-bottom:10px;}
+.announce-card p{color:var(--ink-700);white-space:pre-wrap;margin-bottom:0;}
+.announce-close{
+  position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:999px;
+  border:1px solid var(--border);background:var(--paper-50);color:var(--ink-500);
+  font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.announce-close:hover{background:var(--paper-100);color:var(--ink-900);}

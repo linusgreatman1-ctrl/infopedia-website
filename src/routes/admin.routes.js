@@ -9,6 +9,7 @@ const settingsCtrl = require('../controllers/settings.controller');
 const adminUsersCtrl = require('../controllers/adminUsers.controller');
 const filesCtrl = require('../controllers/files.controller');
 const testimonialsCtrl = require('../controllers/testimonials.controller');
+const announcementCtrl = require('../controllers/announcement.controller');
 
 const router = express.Router();
 router.use(requireAdminAuth);
@@ -46,6 +47,13 @@ router.get('/testimonials', testimonialsCtrl.listTestimonialsForAdmin);
 router.post('/testimonials', testimonialsCtrl.createTestimonial);
 router.put('/testimonials/:id', testimonialsCtrl.updateTestimonial);
 router.delete('/testimonials/:id', testimonialsCtrl.deleteTestimonial);
+
+router.get('/announcements', announcementCtrl.listForAdmin);
+router.post('/announcements', announcementCtrl.createAnnouncement);
+router.put('/announcements/:id', announcementCtrl.updateAnnouncement);
+router.post('/announcements/:id/publish', announcementCtrl.publishAnnouncement);
+router.post('/announcements/:id/unpublish', announcementCtrl.unpublishAnnouncement);
+router.delete('/announcements/:id', announcementCtrl.deleteAnnouncement);
 
 router.get('/admins', adminUsersCtrl.listAdmins);
 router.post('/admins', adminUsersCtrl.createAdmin);

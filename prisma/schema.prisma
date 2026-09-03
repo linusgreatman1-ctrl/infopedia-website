@@ -137,3 +137,21 @@ model Testimonial {
 
   @@index([position])
 }
+
+// A public news item / circular. Shown site-wide as a dismissible card on
+// page load while "active" — publishing a new one deactivates whichever
+// was active before, so at most one shows at a time. Past items are kept
+// (not deleted) so there's a simple history in the admin dashboard.
+model Announcement {
+  id      String @id @default(uuid())
+  kind    String @default("news") // "news" | "circular"
+  title   String
+  message String
+
+  active Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+}

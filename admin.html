@@ -148,6 +148,7 @@
       <button class="tab-btn active" data-tab="reviews">Reviews</button>
       <button class="tab-btn" data-tab="contacts">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
       <button class="tab-btn" data-tab="blog">Blog</button>
+      <button class="tab-btn" data-tab="announcements">News/Circular</button>
       <button class="tab-btn" data-tab="testimonials">Testimonials</button>
       <button class="tab-btn" data-tab="media">Media</button>
       <button class="tab-btn" data-tab="settings">Website</button>
@@ -293,6 +294,45 @@
             <button class="btn-sm primary" id="testimonialSaveBtn">Save testimonial</button>
           </div>
           <p id="testimonialError" style="color:#dc2626;font-size:.85rem;"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="announcementsTab" style="display:none;">
+      <div id="announcementsListView">
+        <div class="section-head">
+          <h2>News / Circular</h2>
+          <button class="btn-sm primary" id="newAnnouncementBtn">New announcement</button>
+        </div>
+        <p class="tab-intro">Published here appears as a dismissible card to every visitor on the website until they close it. Only one can be published at a time — publishing a new one replaces whichever was live before.</p>
+        <div id="announcementsAdminList"></div>
+      </div>
+
+      <div id="announcementEditView" style="display:none;">
+        <div class="section-head">
+          <h2 id="announcementEditTitle">New announcement</h2>
+          <button class="btn-sm" id="announcementCancelBtn">Cancel</button>
+        </div>
+        <div class="admin-card">
+          <div class="field">
+            <label for="aKind">Type</label>
+            <select id="aKind">
+              <option value="news">News</option>
+              <option value="circular">Circular</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="aTitle">Title</label>
+            <input type="text" id="aTitle">
+          </div>
+          <div class="field">
+            <label for="aMessage">Message</label>
+            <textarea id="aMessage" rows="5"></textarea>
+          </div>
+          <div class="admin-actions">
+            <button class="btn-sm primary" id="announcementSaveBtn">Save</button>
+          </div>
+          <p id="announcementError" style="color:#dc2626;font-size:.85rem;"></p>
         </div>
       </div>
     </div>
@@ -552,6 +592,7 @@
     reviews: document.getElementById('reviewsTab'),
     contacts: document.getElementById('contactsTab'),
     blog: document.getElementById('blogTab'),
+    announcements: document.getElementById('announcementsTab'),
     testimonials: document.getElementById('testimonialsTab'),
     media: document.getElementById('mediaTab'),
     settings: document.getElementById('settingsTab'),
@@ -562,6 +603,7 @@
   };
   const tabLoaders = {
     blog: () => loadBlogPosts(),
+    announcements: () => loadAnnouncements(),
     testimonials: () => loadTestimonials(),
     media: () => loadMedia(),
     settings: () => loadSettings(),
@@ -977,6 +1019,110 @@
     }
   }
 
+  // ---- Announcements (News / Circular) ----
+  const announcementsListView = document.getElementById('announcementsListView');
+  const announcementEditView = document.getElementById('announcementEditView');
+  const announcementsAdminList = document.getElementById('announcementsAdminList');
+  const announcementEditTitle = document.getElementById('announcementEditTitle');
+  const announcementError = document.getElementById('announcementError');
+  let editingAnnouncementId = null;
+
+  function openAnnouncementEditor(a){
+    editingAnnouncementId = a ? a.id : null;
+    announcementEditTitle.textContent = a ? 'Edit announcement' : 'New announcement';
+    document.getElementById('aKind').value = a ? a.kind : 'news';
+    document.getElementById('aTitle').value = a ? a.title : '';
+    document.getElementById('aMessage').value = a ? a.message : '';
+    announcementError.textContent = '';
+    announcementsListView.style.display = 'none';
+    announcementEditView.style.display = 'block';
+  }
+  function closeAnnouncementEditor(){
+    editingAnnouncementId = null;
+    announcementEditView.style.display = 'none';
+    announcementsListView.style.display = 'block';
+  }
+  document.getElementById('newAnnouncementBtn').addEventListener('click', () => openAnnouncementEditor(null));
+  document.getElementById('announcementCancelBtn').addEventListener('click', closeAnnouncementEditor);
+
+  document.getElementById('announcementSaveBtn').addEventListener('click', async () => {
+    announcementError.textContent = '';
+    const body = {
+      kind: document.getElementById('aKind').value,
+      title: document.getElementById('aTitle').value.trim(),
+      message: document.getElementById('aMessage').value.trim(),
+    };
+    if (!body.title || !body.message) {
+      announcementError.textContent = 'Title and message are required.';
+      return;
+    }
+    try {
+      if (editingAnnouncementId) {
+        await api(`/api/admin/announcements/${editingAnnouncementId}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await api('/api/admin/announcements', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closeAnnouncementEditor();
+      loadAnnouncements();
+    } catch (e) {
+      announcementError.textContent = e.message;
+    }
+  });
+
+  function renderAnnouncementsList(items){
+    if (!items.length) {
+      announcementsAdminList.innerHTML = '<p class="empty">No announcements yet.</p>';
+      return;
+    }
+    announcementsAdminList.innerHTML = items.map(a => `
+      <div class="admin-card ${a.active ? '' : 'is-hidden'}" data-id="${a.id}">
+        <div class="admin-head">
+          <span class="admin-stars" style="color:${a.kind === 'circular' ? 'var(--gold-400)' : 'var(--blue-500)'};font-size:.72rem;font-family:var(--font-head);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(a.kind)}</span>
+          <span class="admin-meta">${formatDate(a.createdAt)}${a.active ? ' · Live on site' : ''}</span>
+        </div>
+        <p class="admin-comment" style="font-style:normal;font-weight:600;">"${escapeHtml(a.title)}"</p>
+        <p class="admin-author">${escapeHtml(a.message)}</p>
+        <div class="admin-actions">
+          <button class="btn-sm editBtn">Edit</button>
+          <button class="btn-sm primary publishBtn">${a.active ? 'Unpublish' : 'Publish'}</button>
+          <button class="btn-sm danger deleteBtn">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    announcementsAdminList.querySelectorAll('.admin-card').forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('.editBtn').addEventListener('click', () => {
+        const a = window.__announcementsCache.find(x => x.id === id);
+        if (a) openAnnouncementEditor(a);
+      });
+      card.querySelector('.publishBtn').addEventListener('click', async () => {
+        const a = window.__announcementsCache.find(x => x.id === id);
+        try {
+          await api(`/api/admin/announcements/${id}/${a.active ? 'unpublish' : 'publish'}`, { method: 'POST', body: JSON.stringify({}) });
+          loadAnnouncements();
+        } catch (e) { alert(e.message); }
+      });
+      card.querySelector('.deleteBtn').addEventListener('click', async () => {
+        if (!confirm('Delete this announcement? This cannot be undone.')) return;
+        try {
+          await api(`/api/admin/announcements/${id}`, { method: 'DELETE' });
+          loadAnnouncements();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  }
+
+  async function loadAnnouncements(){
+    try {
+      const data = await api('/api/admin/announcements');
+      window.__announcementsCache = data.announcements;
+      renderAnnouncementsList(data.announcements);
+    } catch (e) {
+      announcementsAdminList.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+    }
+  }
+
   // ---- Media ----
   const mediaGrid = document.getElementById('mediaGrid');
   const mediaUploadStatus = document.getElementById('mediaUploadStatus');
@@ -1136,7 +1282,7 @@
   });
 
   // ---- Code Editor + Codes ----
-  const EDITABLE_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html', 'styles.css', 'script.js', 'reviews.js'];
+  const EDITABLE_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html', 'styles.css', 'script.js', 'reviews.js', 'testimonials.js', 'announcement.js'];
   function fileOptionsHtml(){
     return EDITABLE_FILES.map(f => `<option value="${f}">${f}</option>`).join('');
   }

@@ -18,6 +18,7 @@ const adminRoutes = require('./routes/admin.routes');
 const blogRoutes = require('./routes/blog.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const testimonialsRoutes = require('./routes/testimonials.routes');
+const announcementRoutes = require('./routes/announcement.routes');
 const storage = require('./services/storage.service');
 
 const root = path.join(__dirname, '..');
@@ -60,6 +61,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/site-settings', settingsRoutes);
 app.use('/api/testimonials', testimonialsRoutes);
+app.use('/api/announcement', announcementRoutes);
 app.use('/api/admin', adminRoutes);
 
 storage.ensureUploadsDir();
