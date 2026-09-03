@@ -329,6 +329,15 @@
             <label for="aMessage">Message</label>
             <textarea id="aMessage" rows="5"></textarea>
           </div>
+          <div class="field">
+            <label>Image (optional)</label>
+            <div class="imgpick-row">
+              <input type="text" id="aImage" placeholder="Image URL, or upload a file">
+              <input type="file" id="aImageUpload" accept="image/*" style="display:none;">
+              <button type="button" class="btn-sm" id="aImageUploadBtn">Upload</button>
+            </div>
+            <img id="aImagePreview" class="img-preview">
+          </div>
           <div class="admin-actions">
             <button class="btn-sm primary" id="announcementSaveBtn">Save</button>
           </div>
@@ -1027,12 +1036,40 @@
   const announcementError = document.getElementById('announcementError');
   let editingAnnouncementId = null;
 
+  function updateAnnouncementImagePreview(){
+    const url = document.getElementById('aImage').value.trim();
+    const img = document.getElementById('aImagePreview');
+    if (url) { img.src = url; img.style.display = 'block'; }
+    else { img.style.display = 'none'; }
+  }
+  document.getElementById('aImage').addEventListener('input', updateAnnouncementImagePreview);
+  document.getElementById('aImageUploadBtn').addEventListener('click', () => {
+    document.getElementById('aImageUpload').click();
+  });
+  document.getElementById('aImageUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await api('/api/admin/media', { method: 'POST', body: formData });
+      document.getElementById('aImage').value = data.media.url;
+      updateAnnouncementImagePreview();
+    } catch (err) {
+      announcementError.textContent = err.message;
+    } finally {
+      e.target.value = '';
+    }
+  });
+
   function openAnnouncementEditor(a){
     editingAnnouncementId = a ? a.id : null;
     announcementEditTitle.textContent = a ? 'Edit announcement' : 'New announcement';
     document.getElementById('aKind').value = a ? a.kind : 'news';
     document.getElementById('aTitle').value = a ? a.title : '';
     document.getElementById('aMessage').value = a ? a.message : '';
+    document.getElementById('aImage').value = a ? (a.image || '') : '';
+    updateAnnouncementImagePreview();
     announcementError.textContent = '';
     announcementsListView.style.display = 'none';
     announcementEditView.style.display = 'block';
@@ -1051,6 +1088,7 @@
       kind: document.getElementById('aKind').value,
       title: document.getElementById('aTitle').value.trim(),
       message: document.getElementById('aMessage').value.trim(),
+      image: document.getElementById('aImage').value.trim(),
     };
     if (!body.title || !body.message) {
       announcementError.textContent = 'Title and message are required.';

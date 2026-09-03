@@ -143,10 +143,11 @@ model Testimonial {
 // was active before, so at most one shows at a time. Past items are kept
 // (not deleted) so there's a simple history in the admin dashboard.
 model Announcement {
-  id      String @id @default(uuid())
-  kind    String @default("news") // "news" | "circular"
+  id      String  @id @default(uuid())
+  kind    String  @default("news") // "news" | "circular"
   title   String
   message String
+  image   String?
 
   active Boolean @default(false)
 

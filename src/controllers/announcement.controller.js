@@ -22,7 +22,8 @@ function readBody(req) {
   const kind = req.body.kind === 'circular' ? 'circular' : 'news';
   const title = String(req.body.title || '').trim().slice(0, 150);
   const message = String(req.body.message || '').trim().slice(0, 1000);
-  return { kind, title, message };
+  const image = String(req.body.image || '').trim().slice(0, 500) || null;
+  return { kind, title, message, image };
 }
 
 async function createAnnouncement(req, res, next) {

@@ -15,6 +15,7 @@
     backdrop.innerHTML = `
       <div class="announce-card" role="dialog" aria-modal="true" aria-label="${a.kind === 'circular' ? 'Circular' : 'News'}">
         <button class="announce-close" aria-label="Close">&times;</button>
+        ${a.image ? `<img class="announce-image" src="${escapeHtml(a.image)}" alt="">` : ''}
         <span class="announce-tag${a.kind === 'circular' ? ' is-circular' : ''}">${a.kind === 'circular' ? 'Circular' : 'News'}</span>
         <h3>${escapeHtml(a.title)}</h3>
         <p>${escapeHtml(a.message)}</p>
