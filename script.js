@@ -54,37 +54,40 @@ document.querySelectorAll('.service-item').forEach(item => {
 const form = document.getElementById('contactForm');
 const formNote = document.getElementById('formNote');
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = form.name.value.trim();
-  const email = form.email.value.trim();
-  const service = form.service.value;
-  const message = form.message.value.trim();
+// Only index.html has the contact form — skip on pages like blog.html/post.html.
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const service = form.service.value;
+    const message = form.message.value.trim();
 
-  const submitBtn = form.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-  const originalNote = formNote ? formNote.textContent : '';
-  if (formNote) { formNote.textContent = 'Sending…'; formNote.classList.remove('is-error'); }
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    const originalNote = formNote ? formNote.textContent : '';
+    if (formNote) { formNote.textContent = 'Sending…'; formNote.classList.remove('is-error'); }
 
-  try {
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, service, message }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, service, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
 
-    form.reset();
-    if (formNote) formNote.textContent = "Thanks — we've got your message and will be in touch shortly.";
-  } catch (err) {
-    // Backend unreachable (e.g. static preview with no server) — fall back
-    // to opening the user's own email client with the details pre-filled.
-    const subject = `New enquiry — ${service}`;
-    const body = `Name: ${name}\nEmail: ${email}\nService: ${service}\n\n${message}`;
-    window.location.href = `mailto:info@infopediatech.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    if (formNote) formNote.textContent = originalNote;
-  } finally {
-    submitBtn.disabled = false;
-  }
-});
+      form.reset();
+      if (formNote) formNote.textContent = "Thanks — we've got your message and will be in touch shortly.";
+    } catch (err) {
+      // Backend unreachable (e.g. static preview with no server) — fall back
+      // to opening the user's own email client with the details pre-filled.
+      const subject = `New enquiry — ${service}`;
+      const body = `Name: ${name}\nEmail: ${email}\nService: ${service}\n\n${message}`;
+      window.location.href = `mailto:info@infopediatech.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      if (formNote) formNote.textContent = originalNote;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+}
