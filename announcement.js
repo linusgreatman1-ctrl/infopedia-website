@@ -35,7 +35,10 @@
     document.body.appendChild(backdrop);
 
     function close() {
-      try { localStorage.setItem(dismissedKey(a.id), '1'); } catch (e) { /* private mode etc — fine, it'll just show again */ }
+      // sessionStorage, not localStorage — dismissal only lasts this browser
+      // session/tab, so the announcement resurfaces on the visitor's next visit
+      // instead of being hidden for them forever.
+      try { sessionStorage.setItem(dismissedKey(a.id), '1'); } catch (e) { /* private mode etc — fine, it'll just show again */ }
       backdrop.remove();
     }
     backdrop.querySelector('.announce-close').addEventListener('click', close);
@@ -53,7 +56,7 @@
       const a = data.announcement;
       if (!a) return;
       let dismissed = false;
-      try { dismissed = localStorage.getItem(dismissedKey(a.id)) === '1'; } catch (e) { /* ignore */ }
+      try { dismissed = sessionStorage.getItem(dismissedKey(a.id)) === '1'; } catch (e) { /* ignore */ }
       if (!dismissed) showAnnouncement(a);
     } catch (e) {
       // Silently skip — a broken announcement fetch shouldn't affect the rest of the page.
