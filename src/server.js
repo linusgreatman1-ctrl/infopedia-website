@@ -29,12 +29,16 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'script-src': ["'self'", "'unsafe-inline'"],
+        // Tawk.to live chat widget needs its own script/style/font/image
+        // sources plus a websocket connection and an embedded iframe.
+        'script-src': ["'self'", "'unsafe-inline'", 'https://embed.tawk.to'],
         'script-src-attr': ["'self'", "'unsafe-inline'"],
-        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com'],
-        'img-src': ["'self'", 'data:', 'https://images.unsplash.com'],
-        'connect-src': ["'self'"],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://embed.tawk.to'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://embed.tawk.to'],
+        'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://*.tawk.to'],
+        'connect-src': ["'self'", 'https://*.tawk.to', 'wss://*.tawk.to'],
+        'frame-src': ["'self'", 'https://*.tawk.to'],
+        'media-src': ["'self'", 'https://*.tawk.to'],
       },
     },
   })
