@@ -160,12 +160,15 @@ model Announcement {
 // A visitor's conversation in the site's built-in live chat (Admin > Live
 // Chat tab). visitorId is a random UUID the widget generates and keeps in
 // the visitor's own localStorage — their identity token for the thread,
-// no account or login needed to chat.
+// no account or login needed to chat. Not unique: a visitor can have
+// several conversations over time — once one is closed, neither side can
+// post into it again, and the next message from that visitor starts a
+// fresh one.
 model ChatConversation {
   id              String   @id @default(uuid())
-  visitorId       String   @unique
+  visitorId       String
   visitorName     String?
-  status          String   @default("open") // "open" | "closed"
+  status          String   @default("open") // "open" | "closed" — closed = ended, no further messages either side
   unreadByAdmin   Boolean  @default(true) // true whenever the visitor has sent a message the admin hasn't opened yet
   unreadByVisitor Boolean  @default(false) // true whenever the admin has replied and the widget hasn't shown it yet
   lastMessageAt   DateTime @default(now())
@@ -173,6 +176,7 @@ model ChatConversation {
 
   messages ChatMessage[]
 
+  @@index([visitorId])
   @@index([status, lastMessageAt])
 }
 

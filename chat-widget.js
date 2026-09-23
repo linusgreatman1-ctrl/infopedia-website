@@ -41,6 +41,7 @@
       <button class="chat-widget-close" aria-label="Close chat">&times;</button>
     </div>
     <div class="chat-widget-messages" id="chatWidgetMessages"></div>
+    <p class="chat-widget-ended" id="chatWidgetEnded" hidden>This conversation has ended — send a message below to start a new one.</p>
     <form class="chat-widget-form" id="chatWidgetForm">
       <input type="text" id="chatWidgetName" placeholder="Your name (optional)" autocomplete="name" maxlength="100">
       <div class="chat-widget-inputrow">
@@ -58,6 +59,7 @@
   const inputEl = panel.querySelector('#chatWidgetInput');
   const nameEl = panel.querySelector('#chatWidgetName');
   const dotEl = btn.querySelector('.chat-widget-dot');
+  const endedEl = panel.querySelector('#chatWidgetEnded');
 
   const savedName = localStorage.getItem('infopedia_chat_visitor_name');
   if (savedName) nameEl.value = savedName;
@@ -92,6 +94,7 @@
 
       if (panelOpen) {
         renderMessages(messages);
+        endedEl.hidden = !data.conversation || data.conversation.status !== 'closed';
       } else if (latest && latest.sender === 'admin' && latest.id !== lastMessageId) {
         dotEl.hidden = false;
       }

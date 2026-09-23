@@ -91,6 +91,7 @@
   .chat-admin-msg.visitor .chat-admin-bubble{background:#fff;border:1px solid var(--border);color:var(--ink-900);}
   .chat-admin-msg.admin .chat-admin-bubble{background:linear-gradient(135deg,var(--blue-500),var(--cyan-400));color:#fff;}
   .chat-admin-msg-time{font-size:.68rem;color:var(--ink-500);margin-top:3px;}
+  .chat-admin-ended{margin:0;padding:8px 18px;font-size:.78rem;color:var(--ink-500);background:var(--paper-50);border-top:1px solid var(--border);flex-shrink:0;}
   .chat-admin-form{display:flex;gap:10px;padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
   .chat-admin-form input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.88rem;font-family:var(--font-body);}
   @media (max-width:700px){
@@ -217,6 +218,7 @@
             <button class="btn-sm" id="chatCloseToggleBtn">Mark closed</button>
           </div>
           <div class="chat-admin-messages" id="chatThreadMessages"></div>
+          <p class="chat-admin-ended" id="chatThreadEndedNote" hidden>This conversation is closed — reopen it to keep replying.</p>
           <form class="chat-admin-form" id="chatReplyForm">
             <input type="text" id="chatReplyInput" placeholder="Type a reply…" autocomplete="off" maxlength="2000" required>
             <button type="submit" class="btn-sm primary">Send</button>
@@ -859,12 +861,22 @@
   const chatReplyInput = document.getElementById('chatReplyInput');
   const chatCloseToggleBtn = document.getElementById('chatCloseToggleBtn');
   const chatUnreadBadge = document.getElementById('chatUnreadBadge');
+  const chatThreadEndedNote = document.getElementById('chatThreadEndedNote');
+  const chatReplySubmitBtn = chatReplyForm.querySelector('button[type="submit"]');
 
   let chatConversations = [];
   let currentChatId = null;
+  let currentChatClosed = false;
   let chatBadgeTimer = null;
   let chatThreadTimer = null;
   let chatTabInitialized = false;
+
+  function setChatFormState(closed){
+    currentChatClosed = closed;
+    chatThreadEndedNote.hidden = !closed;
+    chatReplyInput.disabled = closed;
+    chatReplySubmitBtn.disabled = closed;
+  }
 
   function renderChatBadge(){
     const unread = chatConversations.filter(c => c.unreadByAdmin).length;
@@ -917,7 +929,9 @@
     try {
       const data = await api(`/api/admin/chat/conversations/${currentChatId}/messages`);
       renderChatMessages(data.messages);
-      chatCloseToggleBtn.textContent = data.conversation.status === 'closed' ? 'Reopen' : 'Mark closed';
+      const closed = data.conversation.status === 'closed';
+      chatCloseToggleBtn.textContent = closed ? 'Reopen' : 'Mark closed';
+      setChatFormState(closed);
     } catch (e) { /* silent */ }
   }
 
@@ -939,7 +953,7 @@
   chatReplyForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const body = chatReplyInput.value.trim();
-    if (!body || !currentChatId) return;
+    if (!body || !currentChatId || currentChatClosed) return;
     chatReplyInput.value = '';
     try {
       await api(`/api/admin/chat/conversations/${currentChatId}/messages`, { method: 'POST', body: JSON.stringify({ body }) });
