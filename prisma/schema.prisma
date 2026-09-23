@@ -156,3 +156,34 @@ model Announcement {
 
   @@index([active])
 }
+
+// A visitor's conversation in the site's built-in live chat (Admin > Live
+// Chat tab). visitorId is a random UUID the widget generates and keeps in
+// the visitor's own localStorage — their identity token for the thread,
+// no account or login needed to chat.
+model ChatConversation {
+  id              String   @id @default(uuid())
+  visitorId       String   @unique
+  visitorName     String?
+  status          String   @default("open") // "open" | "closed"
+  unreadByAdmin   Boolean  @default(true) // true whenever the visitor has sent a message the admin hasn't opened yet
+  unreadByVisitor Boolean  @default(false) // true whenever the admin has replied and the widget hasn't shown it yet
+  lastMessageAt   DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  messages ChatMessage[]
+
+  @@index([status, lastMessageAt])
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         String // "visitor" | "admin"
+  body           String
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}

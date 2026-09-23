@@ -10,6 +10,7 @@ const adminUsersCtrl = require('../controllers/adminUsers.controller');
 const filesCtrl = require('../controllers/files.controller');
 const testimonialsCtrl = require('../controllers/testimonials.controller');
 const announcementCtrl = require('../controllers/announcement.controller');
+const chatCtrl = require('../controllers/chat.controller');
 
 const router = express.Router();
 router.use(requireAdminAuth);
@@ -54,6 +55,11 @@ router.put('/announcements/:id', announcementCtrl.updateAnnouncement);
 router.post('/announcements/:id/publish', announcementCtrl.publishAnnouncement);
 router.post('/announcements/:id/unpublish', announcementCtrl.unpublishAnnouncement);
 router.delete('/announcements/:id', announcementCtrl.deleteAnnouncement);
+
+router.get('/chat/conversations', chatCtrl.listConversationsForAdmin);
+router.get('/chat/conversations/:id/messages', chatCtrl.getMessagesForAdmin);
+router.post('/chat/conversations/:id/messages', chatCtrl.postMessageFromAdmin);
+router.post('/chat/conversations/:id/status', chatCtrl.setConversationStatus);
 
 router.get('/admins', adminUsersCtrl.listAdmins);
 router.post('/admins', adminUsersCtrl.createAdmin);

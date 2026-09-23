@@ -19,6 +19,7 @@ const blogRoutes = require('./routes/blog.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const testimonialsRoutes = require('./routes/testimonials.routes');
 const announcementRoutes = require('./routes/announcement.routes');
+const chatRoutes = require('./routes/chat.routes');
 const storage = require('./services/storage.service');
 
 const root = path.join(__dirname, '..');
@@ -29,16 +30,12 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        // Tawk.to live chat widget needs its own script/style/font/image
-        // sources plus a websocket connection and an embedded iframe.
-        'script-src': ["'self'", "'unsafe-inline'", 'https://embed.tawk.to'],
+        'script-src': ["'self'", "'unsafe-inline'"],
         'script-src-attr': ["'self'", "'unsafe-inline'"],
-        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://embed.tawk.to'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://embed.tawk.to'],
-        'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://*.tawk.to'],
-        'connect-src': ["'self'", 'https://*.tawk.to', 'wss://*.tawk.to'],
-        'frame-src': ["'self'", 'https://*.tawk.to'],
-        'media-src': ["'self'", 'https://*.tawk.to'],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'img-src': ["'self'", 'data:', 'https://images.unsplash.com'],
+        'connect-src': ["'self'"],
       },
     },
   })
@@ -66,6 +63,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/site-settings', settingsRoutes);
 app.use('/api/testimonials', testimonialsRoutes);
 app.use('/api/announcement', announcementRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 
 storage.ensureUploadsDir();

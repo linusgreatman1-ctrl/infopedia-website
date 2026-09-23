@@ -70,6 +70,35 @@
   .contact-tag{display:inline-block;background:var(--paper-50);border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:.75rem;color:var(--ink-700);margin-top:4px;}
   .contact-message{font-size:.92rem;white-space:pre-wrap;margin:10px 0;}
 
+  .chat-admin-layout{display:flex;gap:16px;height:600px;max-height:75vh;}
+  .chat-admin-list{width:250px;flex-shrink:0;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-lg);background:#fff;}
+  .chat-convo-item{display:block;width:100%;text-align:left;padding:14px 16px;border:none;border-bottom:1px solid var(--border);background:none;cursor:pointer;font-family:var(--font-body);}
+  .chat-convo-item:hover{background:var(--paper-50);}
+  .chat-convo-item.active{background:var(--paper-50);box-shadow:inset 3px 0 0 var(--blue-500);}
+  .chat-convo-item .name{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:6px;}
+  .chat-convo-item .name .dot{width:8px;height:8px;border-radius:50%;background:var(--blue-500);flex-shrink:0;}
+  .chat-convo-item .preview{font-size:.78rem;color:var(--ink-500);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-convo-item .meta{font-size:.7rem;color:var(--ink-500);margin-top:4px;}
+  .chat-convo-item.is-closed{opacity:.6;}
+  .chat-admin-thread{flex:1;border:1px solid var(--border);border-radius:var(--radius-lg);background:#fff;display:flex;flex-direction:column;overflow:hidden;align-items:center;justify-content:center;}
+  #chatThreadView.chat-admin-thread{align-items:stretch;justify-content:flex-start;}
+  .chat-admin-thread-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .chat-admin-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px;background:var(--paper-50);}
+  .chat-admin-msg{display:flex;flex-direction:column;max-width:75%;}
+  .chat-admin-msg.visitor{align-self:flex-start;align-items:flex-start;}
+  .chat-admin-msg.admin{align-self:flex-end;align-items:flex-end;}
+  .chat-admin-bubble{padding:9px 13px;border-radius:14px;font-size:.88rem;white-space:pre-wrap;word-break:break-word;}
+  .chat-admin-msg.visitor .chat-admin-bubble{background:#fff;border:1px solid var(--border);color:var(--ink-900);}
+  .chat-admin-msg.admin .chat-admin-bubble{background:linear-gradient(135deg,var(--blue-500),var(--cyan-400));color:#fff;}
+  .chat-admin-msg-time{font-size:.68rem;color:var(--ink-500);margin-top:3px;}
+  .chat-admin-form{display:flex;gap:10px;padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+  .chat-admin-form input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.88rem;font-family:var(--font-body);}
+  @media (max-width:700px){
+    .chat-admin-layout{flex-direction:column;height:auto;max-height:none;}
+    .chat-admin-list{width:100%;max-height:220px;}
+    .chat-admin-thread{min-height:420px;}
+  }
+
   .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .section-head h2{font-family:var(--font-head);font-size:1.1rem;margin:0;}
 
@@ -147,6 +176,7 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="reviews">Reviews</button>
       <button class="tab-btn" data-tab="contacts">Messages<span class="tab-badge" id="unreadBadge" style="display:none;"></span></button>
+      <button class="tab-btn" data-tab="chat">Live Chat<span class="tab-badge" id="chatUnreadBadge" style="display:none;"></span></button>
       <button class="tab-btn" data-tab="blog">Blog</button>
       <button class="tab-btn" data-tab="announcements">News/Circular</button>
       <button class="tab-btn" data-tab="testimonials">Testimonials</button>
@@ -173,6 +203,26 @@
         <div class="stat"><div class="stat-num" id="statContactUnread">–</div><div class="stat-label">Unread</div></div>
       </div>
       <div id="contactsAdminList"></div>
+    </div>
+
+    <div class="tab-panel" id="chatTab" style="display:none;">
+      <div class="chat-admin-layout">
+        <div class="chat-admin-list" id="chatConvoList"></div>
+        <div class="chat-admin-thread" id="chatThreadEmpty">
+          <p class="empty">Select a conversation to view it here.</p>
+        </div>
+        <div class="chat-admin-thread" id="chatThreadView" style="display:none;">
+          <div class="chat-admin-thread-head">
+            <strong id="chatThreadName">Visitor</strong>
+            <button class="btn-sm" id="chatCloseToggleBtn">Mark closed</button>
+          </div>
+          <div class="chat-admin-messages" id="chatThreadMessages"></div>
+          <form class="chat-admin-form" id="chatReplyForm">
+            <input type="text" id="chatReplyInput" placeholder="Type a reply…" autocomplete="off" maxlength="2000" required>
+            <button type="submit" class="btn-sm primary">Send</button>
+          </form>
+        </div>
+      </div>
     </div>
 
     <div class="tab-panel" id="blogTab" style="display:none;">
@@ -597,6 +647,7 @@
     app.style.display = 'block';
     loadReviews();
     loadContacts();
+    startChatBadgePolling();
   }
 
   // ---- Tabs ----
@@ -604,6 +655,7 @@
   const tabPanels = {
     reviews: document.getElementById('reviewsTab'),
     contacts: document.getElementById('contactsTab'),
+    chat: document.getElementById('chatTab'),
     blog: document.getElementById('blogTab'),
     announcements: document.getElementById('announcementsTab'),
     testimonials: document.getElementById('testimonialsTab'),
@@ -615,6 +667,7 @@
     preview: document.getElementById('previewTab'),
   };
   const tabLoaders = {
+    chat: () => initChatTab(),
     blog: () => loadBlogPosts(),
     announcements: () => loadAnnouncements(),
     testimonials: () => loadTestimonials(),
@@ -669,6 +722,9 @@
     catch (e) { /* logging out client-side regardless is fine */ }
     clearTokens();
     loadedTabs.clear();
+    if (chatBadgeTimer) { clearInterval(chatBadgeTimer); chatBadgeTimer = null; }
+    if (chatThreadTimer) { clearInterval(chatThreadTimer); chatThreadTimer = null; }
+    currentChatId = null;
     showLogin();
   });
 
@@ -791,6 +847,129 @@
     } catch (e) {
       contactsListEl.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
     }
+  }
+
+  // ---- Live Chat ----
+  const chatConvoListEl = document.getElementById('chatConvoList');
+  const chatThreadEmptyEl = document.getElementById('chatThreadEmpty');
+  const chatThreadViewEl = document.getElementById('chatThreadView');
+  const chatThreadNameEl = document.getElementById('chatThreadName');
+  const chatThreadMessagesEl = document.getElementById('chatThreadMessages');
+  const chatReplyForm = document.getElementById('chatReplyForm');
+  const chatReplyInput = document.getElementById('chatReplyInput');
+  const chatCloseToggleBtn = document.getElementById('chatCloseToggleBtn');
+  const chatUnreadBadge = document.getElementById('chatUnreadBadge');
+
+  let chatConversations = [];
+  let currentChatId = null;
+  let chatBadgeTimer = null;
+  let chatThreadTimer = null;
+  let chatTabInitialized = false;
+
+  function renderChatBadge(){
+    const unread = chatConversations.filter(c => c.unreadByAdmin).length;
+    if (unread > 0) { chatUnreadBadge.textContent = unread; chatUnreadBadge.style.display = 'inline-block'; }
+    else { chatUnreadBadge.style.display = 'none'; }
+  }
+
+  function renderChatList(){
+    if (!chatConversations.length) {
+      chatConvoListEl.innerHTML = '<p class="empty" style="padding:20px;">No conversations yet.</p>';
+      return;
+    }
+    chatConvoListEl.innerHTML = chatConversations.map(c => `
+      <button class="chat-convo-item ${c.id === currentChatId ? 'active' : ''} ${c.status === 'closed' ? 'is-closed' : ''}" data-id="${c.id}">
+        <div class="name">${c.unreadByAdmin ? '<span class="dot"></span>' : ''}${escapeHtml(c.visitorName || 'Anonymous visitor')}</div>
+        <div class="preview">${c.lastMessage ? escapeHtml(c.lastMessage.body) : 'No messages yet'}</div>
+        <div class="meta">${formatDate(c.lastMessageAt)}</div>
+      </button>
+    `).join('');
+    chatConvoListEl.querySelectorAll('.chat-convo-item').forEach(el => {
+      el.addEventListener('click', () => openChatThread(el.dataset.id));
+    });
+  }
+
+  async function refreshChatConversations(){
+    try {
+      const data = await api('/api/admin/chat/conversations');
+      chatConversations = data.conversations;
+      renderChatBadge();
+      if (chatTabInitialized) renderChatList();
+    } catch (e) { /* silent — retried on next poll */ }
+  }
+
+  function renderChatMessages(messages){
+    if (!messages.length) {
+      chatThreadMessagesEl.innerHTML = '<p class="empty">No messages yet.</p>';
+      return;
+    }
+    chatThreadMessagesEl.innerHTML = messages.map(m => `
+      <div class="chat-admin-msg ${m.sender === 'admin' ? 'admin' : 'visitor'}">
+        <div class="chat-admin-bubble">${escapeHtml(m.body)}</div>
+        <div class="chat-admin-msg-time">${formatDate(m.createdAt)}</div>
+      </div>
+    `).join('');
+    chatThreadMessagesEl.scrollTop = chatThreadMessagesEl.scrollHeight;
+  }
+
+  async function pollChatThread(){
+    if (!currentChatId) return;
+    try {
+      const data = await api(`/api/admin/chat/conversations/${currentChatId}/messages`);
+      renderChatMessages(data.messages);
+      chatCloseToggleBtn.textContent = data.conversation.status === 'closed' ? 'Reopen' : 'Mark closed';
+    } catch (e) { /* silent */ }
+  }
+
+  function openChatThread(id){
+    currentChatId = id;
+    chatThreadEmptyEl.style.display = 'none';
+    chatThreadViewEl.style.display = 'flex';
+    const convo = chatConversations.find(c => c.id === id);
+    chatThreadNameEl.textContent = convo ? (convo.visitorName || 'Anonymous visitor') : 'Visitor';
+    renderChatList();
+    pollChatThread();
+    if (chatThreadTimer) clearInterval(chatThreadTimer);
+    chatThreadTimer = setInterval(pollChatThread, 3000);
+    // Opening it just marked it read server-side — reflect that locally right away.
+    const c = chatConversations.find(x => x.id === id);
+    if (c) { c.unreadByAdmin = false; renderChatBadge(); }
+  }
+
+  chatReplyForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = chatReplyInput.value.trim();
+    if (!body || !currentChatId) return;
+    chatReplyInput.value = '';
+    try {
+      await api(`/api/admin/chat/conversations/${currentChatId}/messages`, { method: 'POST', body: JSON.stringify({ body }) });
+      await pollChatThread();
+      await refreshChatConversations();
+    } catch (e) {
+      alert(e.message);
+      chatReplyInput.value = body;
+    }
+  });
+
+  chatCloseToggleBtn.addEventListener('click', async () => {
+    if (!currentChatId) return;
+    const nowClosed = chatCloseToggleBtn.textContent.trim() === 'Mark closed';
+    try {
+      await api(`/api/admin/chat/conversations/${currentChatId}/status`, { method: 'POST', body: JSON.stringify({ status: nowClosed ? 'closed' : 'open' }) });
+      chatCloseToggleBtn.textContent = nowClosed ? 'Reopen' : 'Mark closed';
+      await refreshChatConversations();
+    } catch (e) { alert(e.message); }
+  });
+
+  function startChatBadgePolling(){
+    if (chatBadgeTimer) return;
+    refreshChatConversations();
+    chatBadgeTimer = setInterval(refreshChatConversations, 8000);
+  }
+
+  function initChatTab(){
+    chatTabInitialized = true;
+    renderChatList();
   }
 
   // ---- Blog ----
@@ -1332,7 +1511,7 @@
   });
 
   // ---- Code Editor + Codes ----
-  const EDITABLE_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html', 'styles.css', 'script.js', 'reviews.js', 'testimonials.js', 'announcement.js', 'tawk.js'];
+  const EDITABLE_FILES = ['index.html', 'blog.html', 'post.html', 'admin.html', 'styles.css', 'script.js', 'reviews.js', 'testimonials.js', 'announcement.js', 'chat-widget.js'];
   function fileOptionsHtml(){
     return EDITABLE_FILES.map(f => `<option value="${f}">${f}</option>`).join('');
   }
